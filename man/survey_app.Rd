@@ -66,7 +66,8 @@ this feature, set to \code{Inf}.}
 \item{gps_interval}{Interval between GPS position updates, in seconds (default = 10 sec).
 This feature is only available for devices with GPS enabled (e.g., tablets and the newest laptops).
 If the device you are using does not support GPS, position updates will be turned off.
-This feature is in \emph{beta} -- not yet guaranteed to work.}
+This feature is in \emph{beta} -- not yet guaranteed to work. The code used to develop this was adapted from
+\href{https://github.com/AugustT/shiny_geolocation/blob/master/accuracy_and_dynamic/server.r}{this Github account.}}
 
 \item{data_width}{The number of data fields expected in your survey data.
 The default is 20, meaning total \code{.csv} width will be 22 columns

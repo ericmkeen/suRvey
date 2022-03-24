@@ -32,7 +32,8 @@
 #' @param gps_interval Interval between GPS position updates, in seconds (default = 10 sec).
 #' This feature is only available for devices with GPS enabled (e.g., tablets and the newest laptops).
 #' If the device you are using does not support GPS, position updates will be turned off.
-#' This feature is in *beta* -- not yet guaranteed to work.
+#' This feature is in *beta* -- not yet guaranteed to work. The code used to develop this was adapted from
+#' [this Github account.](https://github.com/AugustT/shiny_geolocation/blob/master/accuracy_and_dynamic/server.r)
 #' @param data_width The number of data fields expected in your survey data.
 #' The default is 20, meaning total `.csv` width will be 22 columns
 #' (timestamp and event code account for the other two columns), which will work
@@ -286,7 +287,7 @@ survey_app <- function(observers,
   # For debugging only -- not Run!
   if(FALSE){
 
-    observers <- c('Grace','Janie','Ben')
+    observers <- c('Grace','Janie', 'Chenoah', 'Ben')
     platforms <- c('Inside','Outside')
     optics <- c('N/A','Big Eyes', 'Binocs', 'Scope', 'Naked Eye')
     landmarks <- c('N/A','Gil Mtn', 'CMP peaks', 'Otter', 'Twartz', 'Farrant', 'N Fin shore')
@@ -299,7 +300,7 @@ survey_app <- function(observers,
                        'Vessel' = c('Fast travel', 'Slow travel', 'Fishing', 'With whales', 'Anchored'))
 
     # Try it
-    survey_app(observers,
+    suRvey::survey_app(observers,
                platforms,
                optics,
                landmarks,
@@ -328,6 +329,9 @@ survey_app <- function(observers,
 
     # GPS sensor info:
     # https://github.com/AugustT/shiny_geolocation/blob/master/accuracy_and_dynamic/server.r
+
+    library(remotes)
+    remotes::install_github("ericmkeen/suRvey")
   }
 
   ##############################################################################
@@ -1443,6 +1447,7 @@ survey_app <- function(observers,
       rv$df_backup <- rv$df
       new_df <- rv$df
       new_df[i, j] <- isolate(DT::coerceValue(v, new_df[i, j]))
+      new_filename <- get_filename() ; new_filename
       readr::write_csv(x=new_df, file=new_filename, quote='none', col_names=FALSE, append=FALSE)
       rv$df <- new_df
     })
