@@ -1,2 +1,2 @@
 # suRvey
-Data Entry App for Wildlife Surveys
+Data entry app for wildlife surveys, optimized for touchscreens.
