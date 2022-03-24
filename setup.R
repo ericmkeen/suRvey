@@ -13,6 +13,8 @@ library(devtools) ; document() ; load_all()
 #setwd('../')
 create_package('/Users/erickeen/repos/suRvey')
 
+use_pipe(export=TRUE)
+
 # Import packages
 if(FALSE){
   use_package('magrittr')
