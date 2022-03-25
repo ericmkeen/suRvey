@@ -16,16 +16,17 @@ To build and launch your survey app, see the documentation here:
 ?survey_app
 ```
 
+This function launches a Shiny app designed to optimize data entry during wildlife surveys.
+The app was designed with marine mammal surveys in mind, but should be generalizable for other contexts
+and target species. GPS position updates are possible in this app, if the GPS feature is enabled on your device. 
+The app should be useful for both stationary and transect-based surveys.
+Layout has been optimized for touch screens.
+
 
 https://user-images.githubusercontent.com/10263731/159953772-5f319a74-546d-4e39-a393-b27469dc10a3.mov
 
 
-This function launches a Shiny app designed to optimize data entry during wildlife surveys.
-The app was designed with marine mammal surveys in mind, but should be generalizable for other contexts
-and target species. The app should be useful for both stationary and transect-based surveys.
-Layout has been optimized for touch screens.
-
-Here is example code:
+Here is the code used to produce this demo:
 
 ```
 # Customize settings =======================================
