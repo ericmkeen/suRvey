@@ -65,4 +65,11 @@ survey_app(observers,
            behaviours)
 ```
 
+## Coming soon
+
+Next in the development pipeline:
+
+- **`survey_process()`**: a function for processing raw data into an easily summarized and analyzed format.
+- **`survey_summarize()`**: a function for summarizing effort and sightings.
+- **`survey_map()`**: a spatial mapping function.  
 
