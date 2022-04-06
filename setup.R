@@ -41,6 +41,11 @@ if(FALSE){
   use_package('sp')
   use_package('sf')
   use_package('beepr')
+  use_package('BiocManager')
+  use_package('EBImage')
+  use_package('readr')
+  use_package('exifr')
+  use_package('exiftoolr')
 }
 
 #use_mit_license()

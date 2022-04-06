@@ -10,13 +10,18 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Imports: 
     beepr,
+    BiocManager,
     DataCombine,
     devtools,
     dplyr,
     DT,
+    EBImage,
+    exifr,
+    exiftoolr,
     lubridate,
     magrittr,
     plyr,
+    readr,
     rintrojs,
     shiny,
     shinydashboard,
