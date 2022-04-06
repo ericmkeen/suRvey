@@ -8,7 +8,7 @@ Data entry app for wildlife surveys, optimized for touchscreens.
 remotes::install_github("ericmkeen/suRvey")
 ```
 
-## Instructions
+## Touchscreen data entry app
 
 To build and launch your survey app, see the documentation here:
 
@@ -64,6 +64,16 @@ survey_app(observers,
            species,
            behaviours)
 ```
+
+## Image analysis tool 
+
+If your survey involves taking fine-scale measurements of detection locations based upon photographs, you can use the `image_measure()` function to batch-process your photographs. 
+
+```
+?image_measure()
+```
+
+To try out this function, you can download the "images" folder in this repo, extract/unzip it, and place it in your working directory. The app should then work using the four demo photographs in the "images" folder. 
 
 ## Coming soon
 
