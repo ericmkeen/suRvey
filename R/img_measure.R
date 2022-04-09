@@ -81,6 +81,10 @@ image_measure <- function(survey_date=NULL,
 
   } #===========================================================================
 
+  if(! 'EBImage' %in% installed.packages()){
+    BiocManager::install("EBImage")
+  }
+
   if(! file.exists(log_path)){
     previous_measures <- data.frame()
   }else{
@@ -204,6 +208,7 @@ image_measure <- function(survey_date=NULL,
       zoom <- as.numeric(zoom / 100)
       f <- rv$images[rv$imi] %>% as.character
       img <- EBImage::readImage(f)
+      #img <- OpenImageR::readImage(f)
       plotOutput("plot3",
                  width=(dim(img)[1] * zoom),
                  height=(dim(img)[2]) * zoom,
@@ -216,6 +221,8 @@ image_measure <- function(survey_date=NULL,
         if(length(rv$images)>0){
         f <- rv$images[rv$imi] %>% as.character
         img <- EBImage::readImage(f)
+        #img <- OpenImageR::readImage(f)
+        #OpenImageR::imageShow(img)
         plot(img)
         if(!is.null(rv$brng)){ abline(v=rv$brng, col='yellow', lwd=3) }
         if(!is.null(rv$whale)){ abline(h=rv$whale, col='red', lwd=3) }

@@ -46,6 +46,7 @@ if(FALSE){
   use_package('readr')
   use_package('exifr')
   use_package('exiftoolr')
+  use_package('OpenImageR')
 }
 
 #use_mit_license()
