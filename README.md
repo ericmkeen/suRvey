@@ -75,6 +75,15 @@ If your survey involves taking fine-scale measurements of detection locations ba
 
 To try out this function, you can download the "images" folder in this repo, extract/unzip it, and place it in your working directory. The app should then work using the four demo photographs in the "images" folder. 
 
+You can then try out the function by simply running:
+
+```
+image_measure()
+```
+
+The first time you run it, make sure you are connected to the internet; you will be prompted to allow `R` to download the package `EBImage` through the function of another package (`BiocManager`).  
+
+
 ## Coming soon
 
 Next in the development pipeline:
