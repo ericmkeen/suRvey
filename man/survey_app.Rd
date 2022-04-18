@@ -298,6 +298,7 @@ behaviours <- list('MarMam' = c('Active', 'Sleep', 'Feeding',
 
 # Launch app =======================================
 
+if(FALSE){ #not run
 survey_app(observers,
            platforms,
            optics,
@@ -305,5 +306,6 @@ survey_app(observers,
            cues,
            species,
            behaviours)
+}
 
 }

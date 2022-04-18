@@ -5,13 +5,13 @@ library(devtools) ; document() ; load_all()
 #library(devtools) ; remove.packages(hyfer) ; document() ; install() ; library(stationary)
 
 # Full load and check
-#library(devtools) ; document() ; load_all() ; check() ; install() ; library(stationary)
+library(devtools) ; document() ; load_all() ; check() ; install() ; library(suRvey)
 
 # Create package environment
 
 #library(devtools)
 #setwd('../')
-create_package('/Users/erickeen/repos/suRvey')
+#create_package('/Users/erickeen/repos/suRvey')
 
 use_pipe(export=TRUE)
 
@@ -54,18 +54,17 @@ if(FALSE){
 #### Try it out
 
 
-# Install shipstrike
-library(devtools)
-devtools::install_github('ericmkeen/stationary')
-library(soundcheck)
+# Install suRvey
+library(remotes)
+remotes::install_github('ericmkeen/suRvey',
+                         force=TRUE)
+library(suRvey)
 
+# Test image_measure()
+image_measure()
 
-
-
-
-
-
-
+# Test survey_app()
+survey_app()
 
 
 

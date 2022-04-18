@@ -216,7 +216,6 @@
 #' @import magrittr
 #' @import dplyr
 #' @import shiny
-#' @import data.table
 #' @import DT
 #' @export
 #'
@@ -249,6 +248,7 @@
 #'
 #' # Launch app =======================================
 #'
+#' if(FALSE){ #not run
 #' survey_app(observers,
 #'            platforms,
 #'            optics,
@@ -256,6 +256,7 @@
 #'            cues,
 #'            species,
 #'            behaviours)
+#' }
 #'
 survey_app <- function(observers,
                        platforms,
