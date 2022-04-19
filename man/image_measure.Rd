@@ -5,7 +5,6 @@
 \title{Measure pixels in a set of images}
 \usage{
 image_measure(
-  survey_date = NULL,
   img_path = "images/",
   log_path = "measures.csv",
   scroll_width = 1700,
@@ -13,9 +12,6 @@ image_measure(
 )
 }
 \arguments{
-\item{survey_date}{Optional date to filter images to, based upon the CreateDate within image metadata.
-Provide date in the format \code{"yyyy-mm-dd"}. Default is not to filter by date.}
-
 \item{img_path}{Path to the folder of images. The default assumption is that there is
 a folder named "\code{images}" within your working directory.}
 
