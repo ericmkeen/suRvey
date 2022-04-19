@@ -1,5 +1,5 @@
 # Super quick load (no install)
-library(devtools) ; document() ; load_all()
+library(devtools) ; document() #; load_all()
 
 # Quick install
 #library(devtools) ; remove.packages(hyfer) ; document() ; install() ; library(stationary)

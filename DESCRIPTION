@@ -15,8 +15,6 @@ Imports:
     devtools,
     dplyr,
     DT,
-    exifr,
-    exiftoolr,
     lubridate,
     magrittr,
     plyr,

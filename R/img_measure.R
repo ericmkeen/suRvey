@@ -3,9 +3,6 @@
 #' This function launches a Shiny app that allows you to quickly measure the pixel location
 #' of the waterline of a whale/boat and the horizon/shoreline directly behind it in a set of images.
 #'
-#' @param survey_date Optional date to filter images to, based upon the CreateDate within image metadata.
-#' Provide date in the format `"yyyy-mm-dd"`. Default is not to filter by date.
-#'
 #' @param img_path Path to the folder of images. The default assumption is that there is
 #' a folder named "`images`" within your working directory.
 #'
@@ -51,26 +48,21 @@
 #' @import dplyr
 #' @export
 #'
-image_measure <- function(survey_date=NULL,
-                        img_path='images/',
-                        log_path='measures.csv',
-                        scroll_width = 1700,
-                        scroll_height = 400){
+image_measure <- function(img_path='images/',
+                          log_path='measures.csv',
+                          scroll_width = 1700,
+                          scroll_height = 400){
 
   if(FALSE){ #==================================================================
 
-    library(BiocManager)
-    if(! 'EBImage' %in% installed.packages()){
-      BiocManager::install("EBImage")
-    }
-    library(shiny)
-    library(dplyr)
-    library(shinydashboard)
-    library(exifr)
-    library(exiftoolr)
+    #library(BiocManager)
+    #if(! 'EBImage' %in% installed.packages()){
+    #  BiocManager::install("EBImage")
+    #}
+    #library(shiny)
+    #library(dplyr)
+    #library(shinydashboard)
 
-    survey_date <- '2019-07-07'
-    survey_date <- NULL
     img_path <- 'images/'
     log_path <- 'measures.csv'
     scroll_height = 400
@@ -97,19 +89,6 @@ image_measure <- function(survey_date=NULL,
   (image_files <- dir(img_path))
   if(length(image_files) == 0){ stop('No images were found within the images folder!')}
   (image_files <- paste0(img_path, image_files))
-
-  # Get image metadata (just date created)
-  ixf <- exiftoolr::exif_read(image_files)
-  image_dates <- ixf$CreateDate
-  (image_dates <- lubridate::as_date(image_dates))
-
-  # Filter to images from this date?
-  if(!is.null(survey_date)){
-    (keeps <- which(image_dates == survey_date))
-    image_files <- image_files[keeps]
-  }
-  if(length(image_files) == 0){ stop('No images were found for this survey date!')}
-  image_files
 
 
   ######################################################################
