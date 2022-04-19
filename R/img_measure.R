@@ -62,40 +62,6 @@ image_measure <- function(img_path='images/',
     #library(shiny)
     #library(dplyr)
     #library(shinydashboard)
-<<<<<<< HEAD
-    #library(exiftoolr)
-
-    x <- installed.packages()
-    head(x)
-    depends <- x[,5]
-    head(depends,50)
-    keeps <- c()
-    i=33
-    depends[33]
-    for(i in 1:length(depends)){
-      (dependi <- depends[i])
-      if(length(grep('vctrs',dependi))>0){keeps <- c(keeps, i)}
-    }
-    keeps
-
-
-    imports <- x[,5]
-    keeps <- c()
-    i=33
-    for(i in 1:length(imports)){
-      (dependi <- imports[i])
-      if(length(grep('vctrs',dependi))>0){keeps <- c(keeps, i)}
-    }
-    keeps
-
-
-
-
-    survey_date <- '2019-07-07'
-    survey_date <- NULL
-=======
-
->>>>>>> c574ce953ea9f924e4b6e0e48746b06a4f587f55
     img_path <- 'images/'
     log_path <- 'measures.csv'
     scroll_height = 400
@@ -123,23 +89,6 @@ image_measure <- function(img_path='images/',
   if(length(image_files) == 0){ stop('No images were found within the images folder!')}
   (image_files <- paste0(img_path, image_files))
 
-<<<<<<< HEAD
-
-  # Get image metadata (just date created)
-  ixf <- exiftoolr::exif_read(image_files)
-  image_dates <- ixf$CreateDate
-  (image_dates <- lubridate::as_date(image_dates))
-
-  # Filter to images from this date?
-  if(!is.null(survey_date)){
-    (keeps <- which(image_dates == survey_date))
-    image_files <- image_files[keeps]
-  }
-  if(length(image_files) == 0){ stop('No images were found for this survey date!')}
-  image_files
-
-=======
->>>>>>> c574ce953ea9f924e4b6e0e48746b06a4f587f55
 
   ######################################################################
   ######################################################################
