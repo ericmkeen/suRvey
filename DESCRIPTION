@@ -1,6 +1,6 @@
 Package: suRvey
 Title: Data Entry App for Wildlife Surveys
-Version: 0.0.0.9000
+Version: 0.1.0.0000
 Authors@R: 
     person("Eric", "Keen", , "ericmkeen@gmail.com", role = c("aut", "cre"))
 Description: Data entry app for wildlife surveys, optimized for touch screen.
@@ -15,7 +15,6 @@ Imports:
     devtools,
     dplyr,
     DT,
-    exifr,
     exiftoolr,
     lubridate,
     magrittr,

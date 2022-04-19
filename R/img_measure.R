@@ -59,15 +59,40 @@ image_measure <- function(survey_date=NULL,
 
   if(FALSE){ #==================================================================
 
-    library(BiocManager)
-    if(! 'EBImage' %in% installed.packages()){
-      BiocManager::install("EBImage")
+    #library(BiocManager)
+    #if(! 'EBImage' %in% installed.packages()){
+    #  BiocManager::install("EBImage")
+    #}
+    #library(shiny)
+    #library(dplyr)
+    #library(shinydashboard)
+    #library(exiftoolr)
+
+    x <- installed.packages()
+    head(x)
+    depends <- x[,5]
+    head(depends,50)
+    keeps <- c()
+    i=33
+    depends[33]
+    for(i in 1:length(depends)){
+      (dependi <- depends[i])
+      if(length(grep('vctrs',dependi))>0){keeps <- c(keeps, i)}
     }
-    library(shiny)
-    library(dplyr)
-    library(shinydashboard)
-    library(exifr)
-    library(exiftoolr)
+    keeps
+
+
+    imports <- x[,5]
+    keeps <- c()
+    i=33
+    for(i in 1:length(imports)){
+      (dependi <- imports[i])
+      if(length(grep('vctrs',dependi))>0){keeps <- c(keeps, i)}
+    }
+    keeps
+
+
+
 
     survey_date <- '2019-07-07'
     survey_date <- NULL
@@ -97,6 +122,7 @@ image_measure <- function(survey_date=NULL,
   (image_files <- dir(img_path))
   if(length(image_files) == 0){ stop('No images were found within the images folder!')}
   (image_files <- paste0(img_path, image_files))
+
 
   # Get image metadata (just date created)
   ixf <- exiftoolr::exif_read(image_files)
