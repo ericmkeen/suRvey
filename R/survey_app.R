@@ -659,7 +659,19 @@ survey_app <- function(observers,
                         ##############################################################################
                         tabPanel('Review',
                                  tabsetPanel(
-                                   tabPanel(h4('Data'),
+                                   tabPanel(h4('Overview'),
+                                            br(),
+                                            tabsetPanel(
+                                              tabPanel(h5('Scans'),
+                                                       br(), DTOutput('scans')),
+                                              tabPanel(h5('Sightings'),
+                                                       br(), DTOutput('sits')),
+                                              tabPanel(h5('Condition zones'),
+                                                       br(), DTOutput('sea')),
+                                              tabPanel(h5('Comments'),
+                                                       br(), DTOutput('comments'))
+                                              )),
+                                   tabPanel(h4('Raw data'),
                                             br(),
                                             DTOutput('data'),
                                             br(),
@@ -765,9 +777,15 @@ survey_app <- function(observers,
 
     rv <- reactiveValues()
     rv$df <- log_line('B', event_data = paste(rep(',',times=data_width), collapse=''))
+    #rv$overview <- NULL
     rv$df_backup <- NULL
     rv$keypad <- '0'
     gps_timer <- reactiveTimer(1000*gps_interval)
+
+    # Survey overview
+    observeEvent(rv$df,{
+      rv$overview <- survey_overview()
+    })
 
     # Effort =========================
     rv$scan <- 0
@@ -1371,7 +1389,80 @@ survey_app <- function(observers,
 
     ##############################################################################
     ##############################################################################
-    # Review - Data
+    # Review - Overview
+
+    output$scans = DT::renderDT( rv$overview$scans,
+                                extensions = 'Scroller',
+                                options=list(searching = TRUE,
+                                             autoWidth = TRUE,
+                                             columnDefs = list(list(width = '50px', targets = "_all")),
+                                             rownames = FALSE,
+                                             scroller = TRUE,
+                                             scrollX = "400px",
+                                             scrollY = "300px",
+                                             fixedHeader = TRUE,
+                                             class = 'cell-border stripe',
+                                             fixedColumns = list(
+                                               leftColumns = 3,
+                                               heightMatch = 'none'
+                                             )),
+                                editable=FALSE)
+
+
+    output$sits = DT::renderDT( rv$overview$sightings,
+                                 extensions = 'Scroller',
+                                 options=list(searching = TRUE,
+                                              autoWidth = TRUE,
+                                              columnDefs = list(list(width = '50px', targets = "_all")),
+                                              rownames = FALSE,
+                                              scroller = TRUE,
+                                              scrollX = "400px",
+                                              scrollY = "300px",
+                                              fixedHeader = TRUE,
+                                              class = 'cell-border stripe',
+                                              fixedColumns = list(
+                                                leftColumns = 3,
+                                                heightMatch = 'none'
+                                              )),
+                                 editable=FALSE)
+
+    output$sea = DT::renderDT( rv$overview$conditions,
+                                extensions = 'Scroller',
+                                options=list(searching = TRUE,
+                                             autoWidth = TRUE,
+                                             columnDefs = list(list(width = '50px', targets = "_all")),
+                                             rownames = FALSE,
+                                             scroller = TRUE,
+                                             scrollX = "400px",
+                                             scrollY = "300px",
+                                             fixedHeader = TRUE,
+                                             class = 'cell-border stripe',
+                                             fixedColumns = list(
+                                               leftColumns = 3,
+                                               heightMatch = 'none'
+                                             )),
+                                editable=FALSE)
+
+    output$comments = DT::renderDT( rv$overview$comments,
+                                extensions = 'Scroller',
+                                options=list(searching = TRUE,
+                                             autoWidth = TRUE,
+                                             columnDefs = list(list(width = '50px', targets = "_all")),
+                                             rownames = FALSE,
+                                             scroller = TRUE,
+                                             scrollX = "400px",
+                                             scrollY = "300px",
+                                             fixedHeader = TRUE,
+                                             class = 'cell-border stripe',
+                                             fixedColumns = list(
+                                               leftColumns = 3,
+                                               heightMatch = 'none'
+                                             )),
+                                editable=FALSE)
+
+    ##############################################################################
+    ##############################################################################
+    # Review - Raw Data
 
     # Show data table
     output$data = DT::renderDT( rv$df,

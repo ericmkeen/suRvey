@@ -3,6 +3,7 @@
 export("%>%")
 export(image_measure)
 export(survey_app)
+export(survey_overview)
 import(DT)
 import(dplyr)
 import(magrittr)

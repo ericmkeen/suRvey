@@ -70,3 +70,42 @@ survey_app()
 
 
 
+
+# Customize settings =======================================
+
+observers <- c('Grace','Janie','Chenoah', 'Ben')
+
+platforms <- c('Inside','Outside')
+
+optics <- c('N/A','Big Eyes', 'Binocs', 'Scope', 'Naked Eye')
+
+landmarks <- c('N/A','Gil Mtn', 'CMP peaks', 'Otter',
+               'Twartz', 'Farrant', 'N Fin shore')
+
+cues <- c('N/A','Blow','Vessel','Body','Fluke','Splash','Sound')
+
+species <- list('MarMam' = c('Humpback', 'Fin', 'Dalls porpoise',
+                             'Harbour seal', 'Stellars sea lion',
+                             'Elephant seal', 'Killer whale'),
+                'Vessel' = c('Large rec', 'Small rec', 'CFV', 'Sailing',
+                             'Tug only', 'Tug+barge', 'Gitgaat',
+                             'Research', 'Cruise', 'Tanker'))
+
+behaviours <- list('MarMam' = c('Active', 'Sleep', 'Feeding',
+                                'BNF', 'Milling', 'Robust', 'Fast travel',
+                                'RE-TR'),
+                   'Vessel' = c('Fast travel', 'Slow travel', 'Fishing',
+                                'With whales', 'Anchored'))
+# Launch app =======================================
+
+survey_app(observers,
+           platforms,
+           optics,
+           landmarks,
+           cues,
+           species,
+           behaviours)
+
+
+
+
