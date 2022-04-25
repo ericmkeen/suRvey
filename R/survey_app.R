@@ -35,7 +35,7 @@
 #' This feature is in *beta* -- not yet guaranteed to work. The code used to develop this was adapted from
 #' [this Github account.](https://github.com/AugustT/shiny_geolocation/blob/master/accuracy_and_dynamic/server.r)
 #' @param data_width The number of data fields expected in your survey data.
-#' The default is 20, meaning total `.csv` width will be 22 columns
+#' The default is 20, meaning total `.csv` width will be 23 columns
 #' (timestamp and event code account for the other two columns), which will work
 #' for the packaged version of this app. We included this as an input in the event
 #' that you wish to download and customize the function code; this input makes it easier
@@ -170,6 +170,9 @@
 #'   \item Number of calves in group
 #'   \item Number of males in group
 #'   \item Acoustic status
+#'   \item System timestamp of photograph taken of detection at given bearing
+#'   (useful if, for example, you want to measure pixels in an image to triangulate the position
+#'   of a detection within a photograph)
 #'   }
 #'   \item **Sighting updates**:
 #'   \enumerate{
@@ -195,6 +198,10 @@
 #'   \item Updated tertiary behaviour
 #'   \item Updated threat interaction
 #'   \item Updated acoustic status
+#'   \item System timestamp of photograph taken of detection at given bearing
+#'   (useful if, for example, you want to measure pixels in an image to triangulate the position
+#'   of a detection within a photograph)
+
 #'   }
 #'   \item **Comments**:
 #'   \enumerate{
@@ -267,7 +274,7 @@ survey_app <- function(observers,
                        behaviours,
                        scan_target = 15,
                        gps_interval = 10,
-                       data_width = 20,
+                       data_width = 21,
                        scroll_height = 475,
                        button_size = 200,
                        button_padding = 30,
@@ -579,9 +586,11 @@ survey_app <- function(observers,
                                             column(3, h4('# males: '), radio('males', NULL, c('N/A',0:10), default_choices = NULL, height='100px')),
                                             column(3, h4('Acoustics:'), radio('acoustics', NULL, c('N/A', 'Cannot hear', 'Maybe', 'Yes'), default_choices = NULL, height='100px'))),
                                    hr(),
-                                   fluidRow(column(1),
-                                            column(10, actionButton('sit_store','Store new sighting',style=textstyle(button_size*.8, button_padding*.6), width="100%")),
-                                            column(1)),
+                                   fluidRow(column(3, actionButton('sit_photo','Got photo @ this bearing',style=textstyle(button_size*.7, button_padding*.6), width="100%")),
+                                            column(1),
+                                            column(8, actionButton('sit_store','Store new sighting',style=textstyle(button_size*.8, button_padding*.6), width="100%")),
+                                            ),
+                                   br(),
                                    width = 12) # end of box
 
                         ),
@@ -598,9 +607,11 @@ survey_app <- function(observers,
                                                    h4('Update bearing'), uiOutput('up_bearing'),
                                                    h4('New reticle'), uiOutput('up_reticle')),
                                             column(4,
-                                                   h4('Measured with'), radio('up_reticle_how', NULL, c('N/A', optics), height='120px')),
+                                                   h4('Measured with'), radio('up_reticle_how', NULL, c(optics), height='120px')),
                                             column(4,
-                                                   h4('New distance (km)'), uiOutput('up_distance'))),
+                                                   h4('New distance (km)'), uiOutput('up_distance'),
+                                                  br(),
+                                                  actionButton('up_photo', 'Got photo @ this bearing', style=textstyle(button_size*.7, button_padding*.6), width="95%"))),
                                    hr(),
                                    fluidRow(column(3,
                                                    h4('Add estimate from:'), radio('up_obs', NULL, observers, height='100px')),
@@ -814,6 +825,7 @@ survey_app <- function(observers,
     rv$grp_best <- 1
     rv$species_type <- NULL
     rv$species <- NULL
+    rv$sit_photo <- NULL
 
     # Update sighting ===================
     rv$up_bearing <- NULL
@@ -823,7 +835,7 @@ survey_app <- function(observers,
     rv$up_max <- 0
     rv$up_min <- 0
     rv$up_best <- 0
-
+    rv$up_photo <- NULL
 
     # Data review =========================
     rv$row <- NULL
@@ -1071,6 +1083,11 @@ survey_app <- function(observers,
     })
     observeEvent(input$distance,{ isolate({ rv$distance <- rv$keypad  ; rv$keypad <- '0' }) })
 
+    # Photo
+    observeEvent(input$sit_photo,{
+      rv$sit_photo <- as.character(Sys.time())
+    })
+
     # Menus ==================================
 
     output$species <- renderUI({
@@ -1121,7 +1138,8 @@ survey_app <- function(observers,
                         rv$grp_max, rv$grp_min, rv$grp_best,
                         input$species_type, input$species,
                         input$bhvr_primary, input$bhvr_secondary, input$bhvr_tertiary, input$direction,
-                        input$threat, input$calves, input$males, input$acoustics)
+                        input$threat, input$calves, input$males, input$acoustics,
+                        rv$sit_photo)
 
           # Log it
           rv$df <- log_line('SIT', sit_data)
@@ -1131,6 +1149,7 @@ survey_app <- function(observers,
           rv$next_sit <- rv$next_sit + 1
           rv$bearing <- NULL ; rv$reticle <- NULL ; rv$distance <- NULL
           rv$grp_max <- 1 ; rv$grp_min <- 1 ; rv$grp_best <- 1
+          rv$sit_photo <- NULL
           shinyjs::reset('inline') ; shinyjs::reset('cue') ; shinyjs::reset('reticle_how')
           shinyjs::reset('sit_type') ; shinyjs::reset('species')
           shinyjs::reset('bhvr_primary') ; shinyjs::reset('bhvr_secondary') ; shinyjs::reset('bhvr_tertiary') ; shinyjs::reset('direction')
@@ -1241,6 +1260,11 @@ survey_app <- function(observers,
       radio('up_spp3', NULL, c('N/A', species[[list_id]]), width='95%', height='160px')
     })
 
+    # Photo
+    observeEvent(input$up_photo,{
+      rv$up_photo <- as.character(Sys.time())
+    })
+
 
     # Store update ==============================
     observeEvent(input$update,{
@@ -1266,7 +1290,8 @@ survey_app <- function(observers,
                       input$up_max, input$up_min, input$up_best,
                       input$up_mixed, input$up_spp2, input$up_per2, input$up_spp3, input$up_per3,
                       input$up_primary, input$up_secondary, input$up_tertiary, input$up_direction,
-                      input$up_threat, input$up_acoustics)
+                      input$up_threat, input$up_acoustics,
+                      rv$up_photo)
 
         # Log it
         rv$df <- log_line('UPD', upd_data)
@@ -1275,6 +1300,7 @@ survey_app <- function(observers,
         # Manage aftermath (update buttons, fields, etc.)
         rv$up_bearing <- NULL ; rv$up_reticle <- NULL ; rv$up_distance <- NULL
         rv$up_max <- 0 ; rv$up_min <- 0 ; rv$up_best <- 0
+        rv$up_photo <- NULL
         shinyjs::reset('up_reticle_how')
         shinyjs::reset('up_primary') ; shinyjs::reset('up_secondary') ; shinyjs::reset('up_tertiary') ; shinyjs::reset('up_direction')
         shinyjs::reset('up_mixed') ;

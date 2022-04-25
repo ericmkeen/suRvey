@@ -14,7 +14,7 @@ survey_app(
   behaviours,
   scan_target = 15,
   gps_interval = 10,
-  data_width = 20,
+  data_width = 21,
   scroll_height = 475,
   button_size = 200,
   button_padding = 30,
@@ -70,7 +70,7 @@ This feature is in \emph{beta} -- not yet guaranteed to work. The code used to d
 \href{https://github.com/AugustT/shiny_geolocation/blob/master/accuracy_and_dynamic/server.r}{this Github account.}}
 
 \item{data_width}{The number of data fields expected in your survey data.
-The default is 20, meaning total \code{.csv} width will be 22 columns
+The default is 20, meaning total \code{.csv} width will be 23 columns
 (timestamp and event code account for the other two columns), which will work
 for the packaged version of this app. We included this as an input in the event
 that you wish to download and customize the function code; this input makes it easier
@@ -183,6 +183,9 @@ The app logs 6 types of data, described in detail below:
 \item Number of calves in group
 \item Number of males in group
 \item Acoustic status
+\item System timestamp of photograph taken of detection at given bearing
+(useful if, for example, you want to measure pixels in an image to triangulate the position
+of a detection within a photograph)
 }
 \item \strong{Sighting updates}:
 \enumerate{
@@ -208,6 +211,9 @@ The app logs 6 types of data, described in detail below:
 \item Updated tertiary behaviour
 \item Updated threat interaction
 \item Updated acoustic status
+\item System timestamp of photograph taken of detection at given bearing
+(useful if, for example, you want to measure pixels in an image to triangulate the position
+of a detection within a photograph)
 }
 \item \strong{Comments}:
 \enumerate{

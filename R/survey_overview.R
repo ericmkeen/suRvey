@@ -24,6 +24,7 @@ survey_overview <- function(survey_date = NULL){
   if(FALSE){ # for debugging -- not run!
     survey_date <- '2022-04-21'
     result <- survey_overview(survey_date)
+    survey_date <- NULL
 
     result <- survey_overview()
     result$scans
@@ -39,7 +40,13 @@ survey_overview <- function(survey_date = NULL){
   }
 
   (fn <- paste0('data/',survey_date,'.csv'))
+  if(! file.exists(fn)){return(NULL)}
   df <- read.csv(fn, stringsAsFactors = FALSE, header=FALSE)
+
+  if(nrow(df)==0){
+    return(NULL)
+    #stop('No survey data available on this date!')
+  }
 
   names(df)[1:2] <- c('date','event')
   head(df)
@@ -106,8 +113,11 @@ survey_overview <- function(survey_date = NULL){
   (starts <- df$date[starts])
   (ends <- df$date[ends])
 
-  (scans <- data.frame(scan_id = 1:length(starts), start = starts, end = ends))
-  (scans$duration <- difftime(ends, starts, units='mins') %>% as.numeric)
+  scans <- NULL
+  if(length(starts)>0){
+    (scans <- data.frame(scan_id = 1:length(starts), start = starts, end = ends))
+    (scans$duration <- difftime(ends, starts, units='mins') %>% as.numeric)
+  }
   scans
 
   # MARMAMs ====================================================================
