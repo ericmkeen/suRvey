@@ -287,7 +287,8 @@ survey_app <- function(observers,
                        comment_3 = 'Conditions changed dramatically during scan.',
                        comment_4 = 'Scan cut short early.',
                        comment_5 = 'Severe revision needed -- fix manually later!',
-                       comment_6 = 'App crashed -- trying again.'
+                       comment_6 = 'App crashed -- trying again.',
+                       beeps = FALSE
 ){
 
 
@@ -913,7 +914,7 @@ survey_app <- function(observers,
       rv$scan_start <- Sys.time()
       scan_data <- c(rv$scan, input$platform, input$obs_data, input$obs_left, input$obs_right, input$obs_io)
       rv$df <- log_line('EFF', scan_data)
-      beepr::beep(10)
+      if(beeps){beepr::beep(10)}
     }) })
 
     # When scan ends
@@ -922,7 +923,7 @@ survey_app <- function(observers,
       scan_timer <- NULL
       scan_data <- c(rv$scan, input$platform, input$obs_data, input$obs_left, input$obs_right, input$obs_io)
       rv$df <- log_line('EFF', scan_data)
-      beepr::beep(3)
+      if(beeps){beepr::beep(3)}
     })
 
     # Begin scan timer
@@ -952,7 +953,7 @@ survey_app <- function(observers,
       if(!is.null(rv$scan_duration)){
         if(!is.null(scan_target)){
           if(round(as.numeric(rv$scan_duration)) == round((scan_target*60))){
-            beepr::beep(3)
+            if(beeps){beepr::beep(3)}
           }
         }
       }
@@ -1020,7 +1021,7 @@ survey_app <- function(observers,
 
         # Log it
         rv$df <- log_line('SEA', cz_data)
-        beepr::beep()
+        if(beeps){beepr::beep()}
 
         # Manage aftermath (update buttons, fields, etc.)
         rv$cz_left <- 1 ; rv$cz_right <- 359 ; rv$cz_close <- 0 ; rv$cz_far <- 30
@@ -1147,7 +1148,7 @@ survey_app <- function(observers,
 
           # Log it
           rv$df <- log_line('SIT', sit_data)
-          beepr::beep()
+          if(beeps){beepr::beep()}
 
           # Manage aftermath (update buttons, fields, etc.)
           rv$next_sit <- rv$next_sit + 1
@@ -1299,7 +1300,7 @@ survey_app <- function(observers,
 
         # Log it
         rv$df <- log_line('UPD', upd_data)
-        beepr::beep(2)
+        if(beeps){beepr::beep(2)}
 
         # Manage aftermath (update buttons, fields, etc.)
         rv$up_bearing <- NULL ; rv$up_reticle <- NULL ; rv$up_distance <- NULL
@@ -1354,7 +1355,8 @@ survey_app <- function(observers,
       com_txt <- input$com_manual ; com_txt <- gsub(',',';',com_txt)
       com_data <- c(sitno, com_txt)
       rv$df <- log_line('COM', com_data)
-      beepr::beep(2) ; shinyjs::reset('com_spp_table') ; shinyjs::reset('com_manual')
+      if(beeps){beepr::beep(2)}
+      shinyjs::reset('com_spp_table') ; shinyjs::reset('com_manual')
     })
 
     observeEvent(input$com_1,{
@@ -1364,7 +1366,8 @@ survey_app <- function(observers,
       sitno <- ifelse(is.null(sit_row), NA, sits$V3[sit_row])
       com_data <- c(sitno, com_txt)
       rv$df <- log_line('COM', com_data)
-      beepr::beep(2) ; shinyjs::reset('com_spp_table')
+      if(beeps){beepr::beep(2)}
+      shinyjs::reset('com_spp_table')
     })
 
     observeEvent(input$com_2,{
@@ -1374,7 +1377,8 @@ survey_app <- function(observers,
       sitno <- ifelse(is.null(sit_row), NA, sits$V3[sit_row])
       com_data <- c(sitno, com_txt)
       rv$df <- log_line('COM', com_data)
-      beepr::beep(2) ; shinyjs::reset('com_spp_table')
+      if(beeps){beepr::beep(2)}
+      shinyjs::reset('com_spp_table')
     })
 
     observeEvent(input$com_3,{
@@ -1384,7 +1388,8 @@ survey_app <- function(observers,
       sitno <- ifelse(is.null(sit_row), NA, sits$V3[sit_row])
       com_data <- c(sitno, com_txt)
       rv$df <- log_line('COM', com_data)
-      beepr::beep(2) ; shinyjs::reset('com_spp_table')
+      if(beeps){beepr::beep(2)}
+      shinyjs::reset('com_spp_table')
     })
 
     observeEvent(input$com_4,{
@@ -1394,7 +1399,8 @@ survey_app <- function(observers,
       sitno <- ifelse(is.null(sit_row), NA, sits$V3[sit_row])
       com_data <- c(sitno, com_txt)
       rv$df <- log_line('COM', com_data)
-      beepr::beep(2) ; shinyjs::reset('com_spp_table')
+      if(beeps){beepr::beep(2)}
+      shinyjs::reset('com_spp_table')
     })
 
     observeEvent(input$com_5,{
@@ -1404,7 +1410,8 @@ survey_app <- function(observers,
       sitno <- ifelse(is.null(sit_row), NA, sits$V3[sit_row])
       com_data <- c(sitno, com_txt)
       rv$df <- log_line('COM', com_data)
-      beepr::beep(2) ; shinyjs::reset('com_spp_table')
+      if(beeps){beepr::beep(2)}
+      shinyjs::reset('com_spp_table')
     })
 
     observeEvent(input$com_6,{
@@ -1414,7 +1421,8 @@ survey_app <- function(observers,
       sitno <- ifelse(is.null(sit_row), NA, sits$V3[sit_row])
       com_data <- c(sitno, com_txt)
       rv$df <- log_line('COM', com_data)
-      beepr::beep(2) ; shinyjs::reset('com_spp_table')
+      if(beeps){beepr::beep(2)}
+      shinyjs::reset('com_spp_table')
     })
 
     ##############################################################################
