@@ -27,6 +27,7 @@ survey_overview <- function(survey_date = NULL){
     survey_date <- NULL
 
     result <- survey_overview()
+    result
     result$scans
     result$sighting_summary
     result$sightings
