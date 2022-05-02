@@ -6,6 +6,7 @@ Data entry app for wildlife surveys, optimized for touchscreens.
 ```
 # install.packages("remotes") # uncomment if you need to install
 remotes::install_github("ericmkeen/suRvey")
+library(suRvey)
 ```
 
 ## Touchscreen data entry app
