@@ -92,7 +92,5 @@ The first time you run it, make sure you are connected to the internet; you will
 
 Next in the development pipeline:
 
-- **`survey_process()`**: a function for processing raw data into an easily summarized and analyzed format.
-- **`survey_summarize()`**: a function for summarizing effort and sightings.
 - **`survey_map()`**: a spatial mapping function.  
 
