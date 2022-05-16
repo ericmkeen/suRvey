@@ -104,7 +104,9 @@ survey_app(observers,
            landmarks,
            cues,
            species,
-           behaviours)
+           behaviours,
+           scan_target = 1,
+           beeps = TRUE)
 
 
 

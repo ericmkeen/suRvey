@@ -573,7 +573,7 @@ survey_app <- function(observers,
                                                    br(),
                                                    h4('Min. group size*'), uiOutput('grp_min'),
                                                    br(),
-                                                   h4('Best estimate*'), uiOutput('grp_best')),
+                                                   h4('Best group size*'), uiOutput('grp_best')),
                                             column(3,
                                                    radio('species_type', 'Type:*', names(species), default_choices = NULL, height='150px'),
                                                    h4('Species*'), uiOutput('species'))
@@ -952,8 +952,8 @@ survey_app <- function(observers,
     observe({
       if(!is.null(rv$scan_duration)){
         if(!is.null(scan_target)){
-          if(round(as.numeric(rv$scan_duration)) == round((scan_target*60))){
-            if(beeps){beepr::beep(3)}
+          if(round(as.numeric(rv$scan_duration)) > round((scan_target*60))){
+            if(beeps){beepr::beep(10)}
           }
         }
       }

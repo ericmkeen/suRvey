@@ -27,7 +27,8 @@ survey_app(
   comment_3 = "Conditions changed dramatically during scan.",
   comment_4 = "Scan cut short early.",
   comment_5 = "Severe revision needed -- fix manually later!",
-  comment_6 = "App crashed -- trying again."
+  comment_6 = "App crashed -- trying again.",
+  beeps = FALSE
 )
 }
 \arguments{
