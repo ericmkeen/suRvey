@@ -66,6 +66,9 @@ survey_app(observers,
            behaviours)
 ```
 
+To process and summarize a day of survey effort, use the `survey_overview()` function. This function returns a synopsis as well as re-formatted tables of the data to facilitate QA/QC and off-season analysis.  
+
+
 ## Image analysis tool 
 
 If your survey involves taking fine-scale measurements of detection locations based upon photographs, you can use the `image_measure()` function to batch-process your photographs. 
