@@ -400,7 +400,9 @@ survey_app <- function(observers,
 
   radio <- function(id, label_text, choices, default_choices = 'Other',
                     direction = 'vertical', width='100%', height='180px'){
-    shinydashboard::box(width=12, style=paste0('height:',height,';overflow-y: scroll; overflow-x: scroll;'),
+    shinydashboard::box(width=12, style=paste0('height:',height,
+                                               ';overflow-y: scroll; overflow-x: scroll;',
+                                               ' -ms-overflow-style: none;'),
                         shinyWidgets::radioGroupButtons(
                           inputId = id,
                           label = h4(label_text),
