@@ -3,6 +3,10 @@
 #' @param survey_date Survey date, in format `"yyyy-mm-dd"`. If `NULL` the current date
 #' will be used (according to your system's time).
 #'
+#' @param time_zone The time zone to which you wish to force all date-times in the data
+#' (the data numbers will not be changed at all, just R's interpretation of the time zone using
+#' the `lubridate` package).
+#'
 #' @return This function will look for survey data within the `data` subfolder
 #' of your working directory and return a list with various summary tables:
 #'
@@ -17,12 +21,15 @@
 #' (with a numeric indicator of which scan of the day the row of day correspnds to;
 #' if the row of data occurs outside of a scan, the value with be `NA`).
 #' }
+#' @import dplyr
 #' @export
 #'
-survey_overview <- function(survey_date = NULL){
+survey_overview <- function(survey_date = NULL,
+                            time_zone = "Canada/Pacific"){
 
   if(FALSE){ # for debugging -- not run!
-    survey_date <- '2022-04-21'
+    survey_date <- '2022-05-31'
+    time_zone <- 'Canada/Pacific'
     result <- survey_overview(survey_date)
     survey_date <- NULL
 
@@ -43,8 +50,9 @@ survey_overview <- function(survey_date = NULL){
   (fn <- paste0('data/',survey_date,'.csv'))
   if(! file.exists(fn)){return(NULL)}
   df <- read.csv(fn, stringsAsFactors = FALSE, header=FALSE)
+  df
 
-  if(nrow(df)==0){
+  if(nrow(df)<=1){
     return(NULL)
     #stop('No survey data available on this date!')
   }
@@ -121,6 +129,21 @@ survey_overview <- function(survey_date = NULL){
   }
   scans
 
+  if(!is.null(scans)){
+    if(nrow(scans)>0){
+      # Format timezones
+      scans <-
+        scans %>%
+        mutate(start = lubridate::as_datetime(start) %>%
+                 lubridate::force_tz(tzone=time_zone),
+               end = lubridate::as_datetime(end) %>%
+                 lubridate::force_tz(tzone=time_zone))
+
+      # Add scan_key
+      scans$scan_key <- paste0(date(scans$start), '-', scans$scan_id)
+    }
+  }
+
   # MARMAMs ====================================================================
 
   sits <- df %>% dplyr::filter(event == 'SIT')
@@ -146,8 +169,39 @@ survey_overview <- function(survey_date = NULL){
                   threat = V19,
                   calves = V20,
                   males = V21,
-                  acoustic = V23)
+                  acoustic = V22) %>%
+    dplyr::mutate(date = lubridate::as_datetime(date) %>%
+                    lubridate::force_tz(tzone=time_zone),
+                  sit = as.numeric(sit),
+                  bearing = as.numeric(as.character(bearing)),
+                  reticle = as.numeric(as.character(reticle)),
+                  how = as.character(how),
+                  km = as.numeric(as.character(km)),
+                  landmark = as.character(landmark),
+                  cue = as.character(cue),
+                  max = as.numeric(as.character(max)),
+                  min = as.numeric(as.character(min)),
+                  best = as.numeric(as.character(best)),
+                  type = as.character(type),
+                  species = as.character(species),
+                  bhvr1 = as.character(bhvr1),
+                  bhvr2 = as.character(bhvr2),
+                  bhvr3 = as.character(bhvr3),
+                  dir = as.character(dir),
+                  threat = as.character(threat),
+                  calves = as.character(calves),
+                  males = as.character(males),
+                  acoustic = as.character(acoustic)) %>%
+    dplyr::select(-V23)
 
+  sits
+
+  if(!is.null(sits)){
+    if(nrow(sits)>0){
+      # Add scan_key
+      sits$scan_key <- paste0(date(sits$date), '-', sits$scan_id)
+    }
+  }
 
   suppressMessages({
     sit_summ <-
@@ -188,17 +242,63 @@ survey_overview <- function(survey_date = NULL){
                   smear = V13,
                   glare = V14,
                   glare_left = V15,
-                  glare_right = V16)
+                  glare_right = V16) %>%
+    dplyr::mutate(date = lubridate::as_datetime(date) %>%
+                    lubridate::force_tz(tzone=time_zone),
+                  scan_id,
+                  effort,
+                  left = as.numeric(left),
+                  right = as.numeric(right),
+                  near = as.numeric(near),
+                  far = as.numeric(far),
+                  bft = as.numeric(bft),
+                  wave = as.character(wave),
+                  vis = as.character(vis),
+                  precip = as.character(precip),
+                  fog = as.character(fog),
+                  haze = as.character(haze),
+                  smear = as.character(smear),
+                  glare = as.character(glare),
+                  glare_left = as.numeric(glare_left),
+                  glare_right = as.numeric(glare_right))
   sea
+
+  if(!is.null(sea) & !is.null(scans)){
+    if(nrow(sea)>0 & nrow(scans)>0){
+      # Fix scan IDs that may be missing
+      i=5
+      for(i in 1:nrow(sea)){
+        (sei <- sea[i,])
+        if(is.na(sei$scan_id)){
+          tz(sei$date)
+          tz(scans$start)
+          (ts <- as.numeric(sei$date))
+          (ts_scan <- as.numeric(scans$start))
+          (diffs <- abs(ts - ts_scan))
+          mini <- which.min(diffs)[1]
+          sea$scan_id[i] <- scans$scan_id[mini]
+        }
+      }
+      sea
+      sea$scan_key <- paste0(date(sea$date), '-', sea$scan_id)
+    }
+  }
 
   # Comments ===================================================================
 
   comments <- df %>% dplyr::filter(event == 'COM')
   comments <-
     comments %>%
-    dplyr::select(date, scan_id, effort, sit=V3, comment = V4)
+    dplyr::select(date, scan_id, effort, sit=V3, comment = V4) %>%
+    dplyr::mutate(date = lubridate::as_datetime(date) %>%
+                    lubridate::force_tz(tzone=time_zone),
+                  comment = as.character(comment))
 
   # Compile result  ============================================================
+
+  df$date <- df$date %>%
+    lubridate::as_datetime() %>%
+    lubridate::force_tz(tzone=time_zone)
 
   result <-
     list(scans = scans,
