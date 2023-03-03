@@ -28,7 +28,7 @@ survey_overview <- function(survey_date = NULL,
                             time_zone = "Canada/Pacific"){
 
   if(FALSE){ # for debugging -- not run!
-    survey_date <- '2022-05-31'
+    survey_date <- '2022-08-01'
     time_zone <- 'Canada/Pacific'
     result <- survey_overview(survey_date)
     survey_date <- NULL
@@ -169,7 +169,8 @@ survey_overview <- function(survey_date = NULL,
                   threat = V19,
                   calves = V20,
                   males = V21,
-                  acoustic = V22) %>%
+                  acoustic = V22,
+                  photo = V23) %>%
     dplyr::mutate(date = lubridate::as_datetime(date) %>%
                     lubridate::force_tz(tzone=time_zone),
                   sit = as.numeric(sit),
@@ -191,8 +192,9 @@ survey_overview <- function(survey_date = NULL,
                   threat = as.character(threat),
                   calves = as.character(calves),
                   males = as.character(males),
-                  acoustic = as.character(acoustic)) %>%
-    dplyr::select(-V23)
+                  acoustic = as.character(acoustic),
+                  photo = as.character(photo)) #%>%
+    #dplyr::select(-V23)
 
   sits
 

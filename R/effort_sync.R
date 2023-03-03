@@ -30,7 +30,7 @@ effort_sync <- function(df,
     (dfi <- df[i,])
     (scani <- scans %>% filter(scan_key == dfi$scan_key))
 
-    if(nrow(sea_scan) == 0){
+    if(nrow(scani) == 0){
       sei <- scan_default
     }else{
       (sei <- scani[1,] %>% select(scan_length = duration))
