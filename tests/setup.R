@@ -63,9 +63,6 @@ library(suRvey)
 # Test image_measure()
 image_measure()
 
-# Test survey_app()
-survey_app()
-
 survey_overview()
 
 

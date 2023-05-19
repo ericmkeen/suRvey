@@ -433,6 +433,7 @@ survey_app <- function(observers,
   if(nrow(dfall)>0){
     (sits <- dfall %>% dplyr::filter(V2 == 'SIT'))
     (maxsitno <- max(as.numeric(sits$V3), na.rm=TRUE))
+    if(is.na(maxsitno)){maxsitno <- 0}
   }else{
     sits <- data.frame()
     maxsitno <- 0
