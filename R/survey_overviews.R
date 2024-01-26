@@ -6,6 +6,10 @@
 #' If not provided or `NULL`, the function will process all dates within the `data` subfolder of
 #' your working directory.
 #'
+#' @param time_zone The time zone to which you wish to force all date-times in the data
+#' (the data numbers will not be changed at all, just R's interpretation of the time zone using
+#' the `lubridate` package).
+#'
 #' @param verbose Boolean: Print updates to Console?
 #'
 #' @return This function will look for survey data within the `data` subfolder
@@ -26,6 +30,7 @@
 #' @import dplyr
 #'
 survey_overviews <- function(survey_dates = NULL,
+                             time_zone = "Canada/Pacific",
                              verbose = TRUE){
 
   if(FALSE){ # for debugging -- not run!
@@ -109,6 +114,62 @@ survey_overviews <- function(survey_dates = NULL,
   # Concatenate raw data
   df <- lapply(surveys,'[[', 6) #%>% bind_rows) %>% head
   (df <- list_cat(df)) %>% head
+
+  # Ensure data formats ========================================================
+
+  scans <-
+    scans %>%
+    mutate(start = lubridate::as_datetime(start) %>%
+             lubridate::force_tz(tzone=time_zone),
+           end = lubridate::as_datetime(end) %>%
+             lubridate::force_tz(tzone=time_zone))
+
+  sightings <-
+    sightings %>%
+    dplyr::mutate(date = lubridate::as_datetime(date) %>%
+                    lubridate::force_tz(tzone=time_zone),
+                  sit = as.numeric(sit),
+                  bearing = as.numeric(as.character(bearing)),
+                  reticle = as.numeric(as.character(reticle)),
+                  how = as.character(how),
+                  km = as.numeric(as.character(km)),
+                  landmark = as.character(landmark),
+                  cue = as.character(cue),
+                  max = as.numeric(as.character(max)),
+                  min = as.numeric(as.character(min)),
+                  best = as.numeric(as.character(best)),
+                  type = as.character(type),
+                  species = as.character(species),
+                  bhvr1 = as.character(bhvr1),
+                  bhvr2 = as.character(bhvr2),
+                  bhvr3 = as.character(bhvr3),
+                  dir = as.character(dir),
+                  threat = as.character(threat),
+                  calves = as.character(calves),
+                  males = as.character(males),
+                  acoustic = as.character(acoustic),
+                  photo = as.character(photo))
+
+  conditions <-
+    conditions %>%
+    dplyr::mutate(date = lubridate::as_datetime(date) %>%
+                    lubridate::force_tz(tzone=time_zone),
+                  scan_id,
+                  effort,
+                  left = as.numeric(left),
+                  right = as.numeric(right),
+                  near = as.numeric(near),
+                  far = as.numeric(far),
+                  bft = as.numeric(bft),
+                  wave = as.character(wave),
+                  vis = as.character(vis),
+                  precip = as.character(precip),
+                  fog = as.character(fog),
+                  haze = as.character(haze),
+                  smear = as.character(smear),
+                  glare = as.character(glare),
+                  glare_left = as.numeric(glare_left),
+                  glare_right = as.numeric(glare_right))
 
   # Compile result
   result <-

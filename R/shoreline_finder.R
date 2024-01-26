@@ -61,11 +61,20 @@ shoreline_finder <- function(shoreline,
 
     # Get great-circle-distance to each of these points from fin island
     intersections$km <-
-      swfscMisc::distance(lat1 = platform_y,
-                          lon1 = platform_x,
-                          lat2 = intersections$Y,
-                          lon2 = intersections$X,
-                          units = 'nm') * 1.852
+      apply(data.frame(intersections$Y, intersections$X), 1,
+            function(yx){
+              swfscMisc::distance(lat1 = platform_y,
+                                  lon1 = platform_x,
+                                  lat2 = yx[1],
+                                  lon2 = yx[2],
+                                  units = 'nm') * 1.852
+            })
+    # intersections$km <-
+    #   swfscMisc::distance(lat1 = platform_y,
+    #                       lon1 = platform_x,
+    #                       lat2 = intersections$Y,
+    #                       lon2 = intersections$X,
+    #                       units = 'nm') * 1.852
 
     # Filter to intersections that are beyond min acceptable distance
     intersections <- intersections %>% dplyr::filter(km > min_km)

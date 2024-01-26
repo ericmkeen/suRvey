@@ -4,12 +4,20 @@
 \alias{survey_overviews}
 \title{Summarize survey data for a multiple dates}
 \usage{
-survey_overviews(survey_dates = NULL, verbose = TRUE)
+survey_overviews(
+  survey_dates = NULL,
+  time_zone = "Canada/Pacific",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{survey_dates}{A character vector of survey date, in format \code{"yyyy-mm-dd"}.
 If not provided or \code{NULL}, the function will process all dates within the \code{data} subfolder of
 your working directory.}
+
+\item{time_zone}{The time zone to which you wish to force all date-times in the data
+(the data numbers will not be changed at all, just R's interpretation of the time zone using
+the \code{lubridate} package).}
 
 \item{verbose}{Boolean: Print updates to Console?}
 }

@@ -54,13 +54,13 @@ detection_rates <- function(scans,
 
     # Make sure sighting data re complete
     sitwk <-
-      complete(sitwk, wk, species,
+      tidyr::complete(sitwk, wk, species,
                fill=list(n=0,
                          ss_mean = NA,
                          ss_sd = NA,
                          n_ind = 0))
 
-    er <- inner_join(scanwk, sitwk)
+    er <- dplyr::inner_join(scanwk, sitwk)
     er %>% head
 
     # Convert to encounter rate
