@@ -5,7 +5,7 @@
 #' @param sea A `data.frame` produced by `survey_overviews()` or `survey_overview()`.
 #' @param verbose Boolean: print progress updates to Console?
 #'
-#' @return
+#' @return Expanded dataframe.
 #' @import dplyr
 #' @export
 #'

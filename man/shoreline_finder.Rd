@@ -35,7 +35,7 @@ Large numbers are safer, but could slow things down if your shoreline is complex
 \item{toplot}{boolean: Create diagnostic plots?}
 }
 \value{
-
+Vector of coordinates of closest shoreline along bearing.
 }
 \description{
 Find closest shoreline along bearing

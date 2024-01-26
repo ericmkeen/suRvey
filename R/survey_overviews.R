@@ -50,9 +50,11 @@ survey_overviews <- function(survey_dates = NULL,
   i=1
   surveys <- list()
   for(i in 1:length(survey_dates)){
-    survey_date <- survey_dates[i]
+    (survey_date <- survey_dates[i])
     if(verbose){message('--- ',survey_date)}
-    survi <- survey_overview(survey_date)
+    suppressWarnings({
+      survi <- survey_overview(survey_date)
+    })
     survi %>% names
 
     if(!is.null(survi)){
@@ -63,9 +65,30 @@ survey_overviews <- function(survey_dates = NULL,
   # Combine into sepearate lists
   surveys %>% length
   (scans <- lapply(surveys,'[[', 1) %>% bind_rows) %>% head
-  (sightings <- lapply(surveys,'[[', 3) %>% bind_rows) %>% head
-  (conditions <- lapply(surveys,'[[', 4) %>% bind_rows) %>% head
-  (comments <- lapply(surveys,'[[', 5) %>% bind_rows) %>% head
+
+  # Concatenate function (coerce class-formatting to be consistent in each row)
+  list_cat <- function(df){
+    i=1
+    for(i in 1:length(df)){
+      dfi <- df[[i]]
+      dfi[] <- lapply(dfi, as.character)
+      df[[i]] <- dfi
+    }
+    df <- df %>% bind_rows
+    return(df)
+  }
+
+  # Concatenate sightings
+  sightings <- lapply(surveys,'[[', 3)
+  (sightings <- list_cat(sightings)) %>% head
+
+  # Concatenate conditions
+  conditions <- lapply(surveys,'[[', 4)
+  (conditions <- list_cat(conditions)) %>% head
+
+  # Concatenate comments
+  comments <- lapply(surveys,'[[', 5)
+  (comments <- list_cat(comments)) %>% head
 
   # Compile sighting summary
   suppressMessages({
@@ -85,14 +108,7 @@ survey_overviews <- function(survey_dates = NULL,
 
   # Concatenate raw data
   df <- lapply(surveys,'[[', 6) #%>% bind_rows) %>% head
-  i=1
-  for(i in 1:length(df)){
-    dfi <- df[[i]]
-    dfi[] <- lapply(dfi, as.character)
-    df[[i]] <- dfi
-  }
-  df <- df %>% bind_rows
-  df %>% head
+  (df <- list_cat(df)) %>% head
 
   # Compile result
   result <-

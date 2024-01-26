@@ -6,7 +6,7 @@
 #' @param platform_y Latitude to observation platform. in decimal degrees.
 #'
 #' @import dplyr
-#' @return
+#' @return A dataframe of coordinates.
 #' @export
 #'
 sighting_locations <- function(bearings,

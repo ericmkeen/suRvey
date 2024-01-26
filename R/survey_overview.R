@@ -28,7 +28,7 @@ survey_overview <- function(survey_date = NULL,
                             time_zone = "Canada/Pacific"){
 
   if(FALSE){ # for debugging -- not run!
-    survey_date <- '2022-08-01'
+    survey_date <- '2023-09-29'
     time_zone <- 'Canada/Pacific'
     result <- survey_overview(survey_date)
     survey_date <- NULL
@@ -140,7 +140,7 @@ survey_overview <- function(survey_date = NULL,
                  lubridate::force_tz(tzone=time_zone))
 
       # Add scan_key
-      scans$scan_key <- paste0(date(scans$start), '-', scans$scan_id)
+      scans$scan_key <- paste0(lubridate::date(scans$start), '-', scans$scan_id)
     }
   }
 
@@ -150,6 +150,7 @@ survey_overview <- function(survey_date = NULL,
   head(sits)
   sits <-
     sits %>%
+    dplyr::mutate(V23 = ifelse('V23' %in% names(.), V23, NA)) %>%
     dplyr::rename(sit = V3,
                   bearing = V4,
                   reticle = V5,
@@ -201,7 +202,7 @@ survey_overview <- function(survey_date = NULL,
   if(!is.null(sits)){
     if(nrow(sits)>0){
       # Add scan_key
-      sits$scan_key <- paste0(date(sits$date), '-', sits$scan_id)
+      sits$scan_key <- paste0(lubridate::date(sits$date), '-', sits$scan_id)
     }
   }
 
@@ -272,8 +273,8 @@ survey_overview <- function(survey_date = NULL,
       for(i in 1:nrow(sea)){
         (sei <- sea[i,])
         if(is.na(sei$scan_id)){
-          tz(sei$date)
-          tz(scans$start)
+          lubridate::tz(sei$date)
+          lubridate::tz(scans$start)
           (ts <- as.numeric(sei$date))
           (ts_scan <- as.numeric(scans$start))
           (diffs <- abs(ts - ts_scan))
@@ -282,7 +283,7 @@ survey_overview <- function(survey_date = NULL,
         }
       }
       sea
-      sea$scan_key <- paste0(date(sea$date), '-', sea$scan_id)
+      sea$scan_key <- paste0(lubridate::date(sea$date), '-', sea$scan_id)
     }
   }
 

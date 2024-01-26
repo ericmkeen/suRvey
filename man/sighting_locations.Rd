@@ -21,7 +21,7 @@ sighting_locations(
 \item{platform_y}{Latitude to observation platform. in decimal degrees.}
 }
 \value{
-
+A dataframe of coordinates.
 }
 \description{
 Get sighting locations

@@ -28,7 +28,7 @@ a sighting.}
 \item{verbose}{Boolean: Print updates to Console?}
 }
 \value{
-
+A vector of distances, in km.
 }
 \description{
 This is a wrapper of \code{sighting_distance()}

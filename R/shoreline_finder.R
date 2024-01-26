@@ -12,7 +12,7 @@
 #' @param toplot boolean: Create diagnostic plots?
 #'
 #' @import dplyr
-#' @return
+#' @return Vector of coordinates of closest shoreline along bearing.
 #' @export
 #'
 shoreline_finder <- function(shoreline,

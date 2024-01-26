@@ -12,7 +12,7 @@
 #' @param verbose Boolean: Print updates to Console?
 #' @import dplyr
 #'
-#' @return
+#' @return A vector of distances, in km.
 #' @export
 #'
 sighting_distances <- function(sits,

@@ -15,7 +15,7 @@ conditions_sync(df, sea, verbose = TRUE)
 \item{verbose}{Boolean: print progress updates to Console?}
 }
 \value{
-
+Expanded dataframe.
 }
 \description{
 Association conditions to a detection
