@@ -1,13 +1,13 @@
 Package: suRvey
 Title: Data Entry App for Wildlife Surveys
-Version: 2.0.4
+Version: 2.0.6
 Authors@R: 
     person("Eric", "Keen Ezell", , "ekezell@sewanee.edu", role = c("aut", "cre"))
 Description: Data entry app for wildlife surveys, optimized for touch screen.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Imports: 
     beepr,
     BiocManager,

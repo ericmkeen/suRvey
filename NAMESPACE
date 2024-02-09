@@ -2,6 +2,10 @@
 
 export("%>%")
 export(big_eyes_correction)
+export(body_divider)
+export(body_extension)
+export(body_line)
+export(body_orthogonal)
 export(conditions_sync)
 export(detection_rates)
 export(effort_sync)
