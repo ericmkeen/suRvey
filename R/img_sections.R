@@ -1,4 +1,4 @@
-#' Title
+#' Measure and rate sections in an image
 #'
 #' @param url_steps  desc
 #' @param url_sections  desc
@@ -13,6 +13,7 @@
 #' @return desc
 #' @export
 #' @import dplyr
+#' @import shiny
 #'
 img_sections <- function(url_steps,
                          url_sections,
