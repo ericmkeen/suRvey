@@ -288,12 +288,12 @@ img_sections <- function(url_steps,
                                                   label=names(cats)[2],
                                                   choices=stringr::str_split(cats[x,2],', ')[[1]],
                                                   selectize=FALSE,
-                                                  size=1),
+                                                  size=4),
                                shiny::selectInput(paste0('cat_',cats[x, 1],'_',names(cats)[3]),
                                                   label=names(cats)[3],
                                                   choices=stringr::str_split(cats[x,3],', ')[[1]],
                                                   selectize=FALSE,
-                                                  size=1))
+                                                  size=4))
                })
       }
     })
