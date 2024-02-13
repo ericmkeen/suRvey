@@ -247,6 +247,8 @@ img_sections <- function(url_steps,
             names(stepi)[names(stepi) == 'z3'] <- gsub(' ','_',names(cats)[3]) %>% tolower
             print(stepi)
             rv$steps <- rbind(rv$steps, stepi)
+
+            showNotification("Measure saved!", duration=2, type='message')
           }
         }
       })})
@@ -255,7 +257,7 @@ img_sections <- function(url_steps,
 
     output$stage2 <- renderUI({
       if(rv$stage == 2){
-        fluidRow(column(2, htmlOutput('sections')),
+        fluidRow(column(4, htmlOutput('sections')),
                  uiOutput('cats'),
                  column(2, uiOutput('cats_save')))
       }
@@ -300,14 +302,14 @@ img_sections <- function(url_steps,
 
     output$cats_save <- renderUI({
       if(rv$stage == 2 & rv$cat_logger < nrow(sections)){
-        actionButton('section_save', h4(HTML('Save for<br/>this section')), width='95%')
+        actionButton('section_save', h4(HTML('Commit for<br/>this section')), width='95%')
       }
     })
 
     observeEvent(input$section_save, {
-      # add actions here
       if(rv$stage == 2){
         inputs <- shiny::reactiveValuesToList(input) # get list of all inputs
+        ok2commit <- TRUE
         sections <- data.frame()
         x=1
         for(x in 1:nrow(cats)){
@@ -317,19 +319,25 @@ img_sections <- function(url_steps,
           input_name <- paste0('cat_',cats[x, 1],'_',names(cats)[2])
           input_x <- which(names(inputs) == input_name)
           inputx <- inputs[[input_x]]
-          z2 <- inputx
+          z2 <- gsub(' ','', inputx)
 
           # Save col 3
           input_name <- paste0('cat_',cats[x, 1],'_',names(cats)[3])
           input_x <- which(names(inputs) == input_name)
           inputx <- inputs[[input_x]]
-          z3 <- inputx
+          z3 <- gsub(' ','', inputx)
+
+          if(z2 %in% c('Possible', 'Yes')){
+            if(z3 %in% c('X')){
+              ok2commit <- FALSE
+            }
+          }
 
           # Setup row
           stepi <- data.frame(image = rv$images[rv$imi],
                               width = rv$img_dim[1],
                               height = rv$img_dim[2],
-                              stage = rv$stepi$stage,
+                              stage = rv$stage,
                               measure = NA,
                               x = NA,
                               y = NA,
@@ -346,25 +354,19 @@ img_sections <- function(url_steps,
           print(stepi)
           sections <- rbind(sections, stepi)
         }
-        print(sections)
-        rv$sections <- rbind(rv$sections, sections)
-        rv$cat_logger <- rv$cat_logger + 1
 
-        #output$cats <- shiny::renderUI(NULL)
-        # x=1
-        # inputs <- shiny::reactiveValuesToList(input) # get list of all inputs
-        # print(inputs)
-        # for(x in 1:nrow(cats)){
-        #   input1 <- cats[x,1]
-        #   input_name <- paste0('cat_',cats[x, 1],'_',names(cats)[2]) # col 2
-        #   print(input_name)
-        #   updateSelectInput(session, input_name)
-        #   #shinyjs::reset(input_name)
-        #   input_name <- paste0('cat_',cats[x, 1],'_',names(cats)[3]) # col 3
-        #   print(input_name)
-        #   updateSelectInput(session, input_name)
-        #   #shinyjs::reset(input_name)
-        # }
+        if(ok2commit){
+          print(sections)
+          rv$sections <- rbind(rv$sections, sections)
+          rv$cat_logger <- rv$cat_logger + 1
+          showNotification("Added to docket! (But not saved yet)", duration=2, type='message')
+        }else{
+          showModal(modalDialog(
+            'One of your sections has "Possibe" or "Yes" in the top box, but "X" in the bottom! Change the "X"!',
+            title = 'Cannot commit!', footer = modalButton("Dismiss"),
+            size = c("m"), easyClose = TRUE, fade = TRUE
+          ))
+        }
       }
     })
 
@@ -523,6 +525,8 @@ img_sections <- function(url_steps,
         rv$secti <- NULL
         shinyjs::reset('zoom')
         shinyjs::reset('comment')
+
+        showNotification("All measurements for this image have been saved to 'measures.csv'!", duration=3, type='message')
       })
     })
 
