@@ -1,16 +1,16 @@
 #' Measure and rate sections in an image
 #'
-#' @param url_steps  desc
-#' @param url_sections  desc
-#' @param url_cats  desc
-#' @param section_plotter desc
-#' @param analyst  desc
-#' @param images  desc
-#' @param log_path  desc
-#' @param scroll_width  desc
-#' @param scroll_height  desc
+#' @param url_steps  URL to sheet within `GoogleSheets` that has step-by-step instructions for each click the user should make on the image.
+#' @param url_sections  URL to sheet within `GoogleSheets` that has each section that should be evaluated on the body.
+#' @param url_cats  URL to sheet within `GoogleSheets` that has each category by which the section should be evaluated.
+#' @param section_plotter A function defined by the user, that will plot lines on the image based on the measures clicked on by the user based on `url_steps` instructions.
+#' @param analyst  Name of analyst.
+#' @param images  Filepaths to images
+#' @param log_path  Path to where the measurement file should be saved.
+#' @param scroll_width  How wide to make the image scrolling area in the app?
+#' @param scroll_height How tall?
 #'
-#' @return desc
+#' @return A `Shiny` app.
 #' @export
 #' @import dplyr
 #' @import shiny

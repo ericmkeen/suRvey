@@ -17,26 +17,26 @@ img_sections(
 )
 }
 \arguments{
-\item{url_steps}{desc}
+\item{url_steps}{URL to sheet within \code{GoogleSheets} that has step-by-step instructions for each click the user should make on the image.}
 
-\item{url_sections}{desc}
+\item{url_sections}{URL to sheet within \code{GoogleSheets} that has each section that should be evaluated on the body.}
 
-\item{url_cats}{desc}
+\item{url_cats}{URL to sheet within \code{GoogleSheets} that has each category by which the section should be evaluated.}
 
-\item{section_plotter}{desc}
+\item{section_plotter}{A function defined by the user, that will plot lines on the image based on the measures clicked on by the user based on \code{url_steps} instructions.}
 
-\item{analyst}{desc}
+\item{analyst}{Name of analyst.}
 
-\item{images}{desc}
+\item{images}{Filepaths to images}
 
-\item{log_path}{desc}
+\item{log_path}{Path to where the measurement file should be saved.}
 
-\item{scroll_width}{desc}
+\item{scroll_width}{How wide to make the image scrolling area in the app?}
 
-\item{scroll_height}{desc}
+\item{scroll_height}{How tall?}
 }
 \value{
-desc
+A \code{Shiny} app.
 }
 \description{
 Measure and rate sections in an image
