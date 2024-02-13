@@ -108,9 +108,8 @@ img_sections <- function(url_steps,
       column(4,uiOutput('save')),
       column(1,actionButton(inputId="skip",label=h4(HTML("Skip")),width="95%")),
       column(1,actionButton(inputId="reset",label=h4(HTML("Reset")),width="95%")),
-      column(2,actionButton(inputId="cancel_last",label=h4(HTML("Cancel last")),width="95%")),
-      column(3, sliderInput('zoom', label = 'Set zoom %', min = 10, max= 100, value=30, step=5, width = '100%')),
-      column(1,checkboxInput('filter', label='Filter to unmeasured images',
+      column(4, sliderInput('zoom', label = 'Set zoom %', min = 10, max= 100, value=30, step=5, width = '100%')),
+      column(2,checkboxInput('filter', label='Filter to unmeasured images',
                              value=TRUE,width='100%'))),
     hr(),
     uiOutput('stage1'),
@@ -283,7 +282,7 @@ img_sections <- function(url_steps,
       if(rv$stage == 2){
         lapply(1:nrow(cats),
                function(x){
-                 shiny::column(2,
+                 shiny::column(1,
                                h4(cats[x, 1]),
                                shiny::selectInput(paste0('cat_',cats[x, 1],'_',names(cats)[2]),
                                                   label=names(cats)[2],
@@ -454,24 +453,28 @@ img_sections <- function(url_steps,
 
     observeEvent(input$reset, {
       rv$steps <- data.frame()
+      rv$sections <- data.frame()
+      rv$cat_logger <- 1
+      rv$stage <- 1
+      rv$stepi <- NULL
     })
 
-    observeEvent(input$cancel_last, {
-      if(rv$stage == 1){
-        if(nrow(rv$steps) > 0){
-          rv$steps <- rv$steps[1:(nrow(rv$steps)-1), ]
-        }
-      }
-      if(rv$stage == 2){
-        if(nrow(rv$sections) > 0){
-          print(rv$sections)
-          rv$sections <- rv$sections[1:(nrow(rv$sections)-nrow(cats)), ]
-          rv$cat_logger <- 1
-          print(rv$sections)
-        }
-      }
-
-    })
+    # observeEvent(input$cancel_last, {
+    #   if(rv$stage == 1){
+    #     if(nrow(rv$steps) > 0){
+    #       rv$steps <- rv$steps[1:(nrow(rv$steps)-1), ]
+    #     }
+    #   }
+    #   if(rv$stage == 2){
+    #     if(nrow(rv$sections) > 0){
+    #       print(rv$sections)
+    #       rv$sections <- rv$sections[1:(nrow(rv$sections)-nrow(cats)), ]
+    #       rv$cat_logger <- 1
+    #       print(rv$sections)
+    #     }
+    #   }
+    #
+    # })
 
     output$save <- renderUI({
       null_tests <- c(nrow(rv$steps) == nrow(steps_all),
