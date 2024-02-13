@@ -248,7 +248,7 @@ img_sections <- function(url_steps,
             print(stepi)
             rv$steps <- rbind(rv$steps, stepi)
 
-            showNotification("Measure saved!", duration=2, type='message')
+            showNotification("Measure saved!", duration=1, type='message')
           }
         }
       })})
