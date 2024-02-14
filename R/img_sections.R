@@ -210,11 +210,10 @@ img_sections <- function(url_steps,
                               z1 = NA,
                               z2 = NA,
                               z3 = NA,
+                              z4 = NA,
+                              z5 = NA,
                               analyst = analyst,
                               logged = Sys.time() %>% as.character())
-          names(stepi)[names(stepi) == 'z1'] <- gsub(' ','_',names(cats)[1]) %>% tolower
-          names(stepi)[names(stepi) == 'z2'] <- gsub(' ','_',names(cats)[2]) %>% tolower
-          names(stepi)[names(stepi) == 'z3'] <- gsub(' ','_',names(cats)[3]) %>% tolower
           print(stepi)
           rv$steps <- rbind(rv$steps, stepi)
         }
@@ -240,11 +239,11 @@ img_sections <- function(url_steps,
                                 z1 = NA,
                                 z2 = NA,
                                 z3 = NA,
+                                z4 = NA,
+                                z5 = NA,
                                 analyst = analyst,
                                 logged = Sys.time() %>% as.character())
-            names(stepi)[names(stepi) == 'z1'] <- gsub(' ','_',names(cats)[1]) %>% tolower
-            names(stepi)[names(stepi) == 'z2'] <- gsub(' ','_',names(cats)[2]) %>% tolower
-            names(stepi)[names(stepi) == 'z3'] <- gsub(' ','_',names(cats)[3]) %>% tolower
+
             print(stepi)
             rv$steps <- rbind(rv$steps, stepi)
 
@@ -266,7 +265,7 @@ img_sections <- function(url_steps,
     output$sections <- renderText({
       toprint <- ''
       if(rv$stage == 2){
-        if(rv$cat_logger == nrow(sections)){
+        if(rv$cat_logger == 1 + nrow(sections)){
           toprint <- '<h3>Measuring complete! Click Save!</h3>'
         }else{
           secti <- rv$cat_logger
@@ -284,25 +283,21 @@ img_sections <- function(url_steps,
       if(rv$stage == 2){
         lapply(1:nrow(cats),
                function(x){
-                 shiny::column(1,
-                               h4(cats[x, 1]),
-                               shiny::selectInput(paste0('cat_',cats[x, 1],'_',names(cats)[2]),
-                                                  label=names(cats)[2],
-                                                  choices=stringr::str_split(cats[x,2],', ')[[1]],
-                                                  selectize=FALSE,
-                                                  size=4),
-                               shiny::selectInput(paste0('cat_',cats[x, 1],'_',names(cats)[3]),
-                                                  label=names(cats)[3],
-                                                  choices=stringr::str_split(cats[x,3],', ')[[1]],
-                                                  selectize=FALSE,
-                                                  size=4))
+                 shiny::column(2,
+                               shiny::selectInput(paste0('cat_',cats$label[x]),
+                                                  label=cats$label[x],
+                                                  choices=stringr::str_split(cats$choices[x],', ')[[1]],
+                                                  selected = stringr::str_split(cats$choices[x],', ')[[1]][1],
+                                                  multiple = ifelse(x==1, FALSE, TRUE)))
                })
       }
     })
 
     output$cats_save <- renderUI({
-      if(rv$stage == 2 & rv$cat_logger < nrow(sections)){
+      if(rv$stage == 2 & rv$cat_logger <= nrow(sections)){
         actionButton('section_save', h4(HTML('Commit for<br/>this section')), width='95%')
+      }else{
+
       }
     })
 
@@ -310,31 +305,26 @@ img_sections <- function(url_steps,
       if(rv$stage == 2){
         inputs <- shiny::reactiveValuesToList(input) # get list of all inputs
         ok2commit <- TRUE
-        sections <- data.frame()
+        (zinputs <- rep(NA, times=5))
         x=1
         for(x in 1:nrow(cats)){
-          input1 <- cats[x,1]
-
-          # Save col 2
-          input_name <- paste0('cat_',cats[x, 1],'_',names(cats)[2])
+          input_name <- paste0('cat_',cats$label[x])
           input_x <- which(names(inputs) == input_name)
           inputx <- inputs[[input_x]]
-          z2 <- gsub(' ','', inputx)
+          zinputs[x] <- paste(inputx, collapse=', ')
+        }
 
-          # Save col 3
-          input_name <- paste0('cat_',cats[x, 1],'_',names(cats)[3])
-          input_x <- which(names(inputs) == input_name)
-          inputx <- inputs[[input_x]]
-          z3 <- gsub(' ','', inputx)
-
-          if(z2 %in% c('Possible', 'Yes')){
-            if(z3 %in% c('X')){
-              ok2commit <- FALSE
-            }
+        # Check for missing data
+        (missing_test <- any(sapply(zinputs[2:5], function(x){!is.na(x) && x == 'X'})))
+        if(zinputs[1] %in% c('Possible', 'Yes')){
+          if(missing_test){
+            ok2commit <- FALSE
           }
+        }
 
+        if(ok2commit){
           # Setup row
-          stepi <- data.frame(image = rv$images[rv$imi],
+          sections <- data.frame(image = rv$images[rv$imi],
                               width = rv$img_dim[1],
                               height = rv$img_dim[2],
                               stage = rv$stage,
@@ -342,20 +332,13 @@ img_sections <- function(url_steps,
                               x = NA,
                               y = NA,
                               section = rv$secti$section,
-                              z1 = input1,
-                              z2 = z2,
-                              z3 = z3,
+                              z1 = zinputs[1],
+                              z2 = zinputs[2],
+                              z3 = zinputs[3],
+                              z4 = zinputs[4],
+                              z5 = zinputs[5],
                               analyst = analyst,
                               logged = Sys.time() %>% as.character())
-          names(stepi)[names(stepi) == 'z1'] <- gsub(' ','_',names(cats)[1]) %>% tolower
-          names(stepi)[names(stepi) == 'z2'] <- gsub(' ','_',names(cats)[2]) %>% tolower
-          names(stepi)[names(stepi) == 'z3'] <- gsub(' ','_',names(cats)[3]) %>% tolower
-          names(stepi) <- tolower(names(stepi))
-          print(stepi)
-          sections <- rbind(sections, stepi)
-        }
-
-        if(ok2commit){
           print(sections)
           rv$sections <- rbind(rv$sections, sections)
           rv$cat_logger <- rv$cat_logger + 1
@@ -461,26 +444,9 @@ img_sections <- function(url_steps,
       rv$stepi <- NULL
     })
 
-    # observeEvent(input$cancel_last, {
-    #   if(rv$stage == 1){
-    #     if(nrow(rv$steps) > 0){
-    #       rv$steps <- rv$steps[1:(nrow(rv$steps)-1), ]
-    #     }
-    #   }
-    #   if(rv$stage == 2){
-    #     if(nrow(rv$sections) > 0){
-    #       print(rv$sections)
-    #       rv$sections <- rv$sections[1:(nrow(rv$sections)-nrow(cats)), ]
-    #       rv$cat_logger <- 1
-    #       print(rv$sections)
-    #     }
-    #   }
-    #
-    # })
-
     output$save <- renderUI({
       null_tests <- c(nrow(rv$steps) == nrow(steps_all),
-                      rv$cat_logger == nrow(sections))
+                      rv$cat_logger == nrow(sections) + 1)
       if(all(null_tests)){
         actionButton(inputId="save",label=h3(HTML("Save & Next")),width="95%")
       }else{
