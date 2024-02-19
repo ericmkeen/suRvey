@@ -104,6 +104,8 @@ img_sections <- function(url_steps,
 
   ui <- fluidPage(
     br(),
+    fluidRow(column(12, uiOutput('img_select'))),
+    br(),
     fluidRow(
       column(4,uiOutput('save')),
       column(1,actionButton(inputId="skip",label=h4(HTML("Skip")),width="95%")),
@@ -164,6 +166,26 @@ img_sections <- function(url_steps,
     rv$cat_logger <- 1
     rv$cat_label_input <- 'starting value'
 
+    # Select image  ============================================================
+
+    output$img_select <- renderUI({
+      selectInput('img_select',
+                  'Select image file to analyze:',
+                  choices = rv$images,
+                  selected = rv$images[rv$imi],
+                  width = '100%')
+    })
+
+    # Update rv$imi if the user selects an image other than the first
+    observeEvent(input$img_select, {
+      print(input$img_select)
+      new_i <- which(rv$images == input$img_select)
+      if(rv$imi != new_i){
+        rv$imi <- new_i
+        print(rv$imi)
+      }
+    })
+
     # Stage 1 work =============================================================
 
     output$stage1 <- renderUI({
@@ -218,7 +240,7 @@ img_sections <- function(url_steps,
                               z5 = NA,
                               analyst = analyst,
                               logged = Sys.time() %>% as.character())
-          print(stepi)
+          #print(stepi)
           rv$steps <- rbind(rv$steps, stepi)
         }
       })})
@@ -248,7 +270,7 @@ img_sections <- function(url_steps,
                                 analyst = analyst,
                                 logged = Sys.time() %>% as.character())
 
-            print(stepi)
+            #print(stepi)
             rv$steps <- rbind(rv$steps, stepi)
 
             showNotification("Measure saved!", duration=1, type='message')
@@ -405,7 +427,7 @@ img_sections <- function(url_steps,
                               z5 = zinputs[5],
                               analyst = analyst,
                               logged = Sys.time() %>% as.character())
-          print(sections)
+          #print(sections)
           rv$sections <- rbind(rv$sections, sections)
           rv$cat_logger <- rv$cat_logger + 1
           showNotification("Added to docket! (But not saved yet)", duration=2, type='message')
@@ -475,30 +497,38 @@ img_sections <- function(url_steps,
     }) %>% debounce(1000)
 
     output$img_show <- renderUI({
-      zoom <- dezoom() %>% as.numeric
-      #zoom <- input$zoom %>% as.numeric
-      zoom <- as.numeric(zoom / 100)
-      f <- rv$images[rv$imi] %>% as.character
-      img <- EBImage::readImage(f)
-      rv$img_dim <- dim(img)
-      #img <- OpenImageR::readImage(f)
-      plotOutput("plot3",
-                 width=(dim(img)[1] * zoom),
-                 height=(dim(img)[2]) * zoom,
-                 click = clickOpts(id="img_click"),
-                 dblclick = clickOpts(id='img_double'))
+      if(!is.null(input$img_select)){
+        zoom <- dezoom() %>% as.numeric
+        #zoom <- input$zoom %>% as.numeric
+        zoom <- as.numeric(zoom / 100)
+        f <- input$img_select %>% as.character
+        print(f)
+        #f <- rv$images[rv$imi] %>% as.character
+        img <- EBImage::readImage(f)
+        rv$img_dim <- dim(img)
+        #img <- OpenImageR::readImage(f)
+        plotOutput("plot3",
+                   width=(dim(img)[1] * zoom),
+                   height=(dim(img)[2]) * zoom,
+                   click = clickOpts(id="img_click"),
+                   dblclick = clickOpts(id='img_double'))
+      }
     })
 
     output$plot3 <- renderPlot({
       if(!is.null(rv$images)){
         if(length(rv$images)>0){
-          f <- rv$images[rv$imi] %>% as.character
-          img <- EBImage::readImage(f)
-          #img <- OpenImageR::readImage(f)
-          #OpenImageR::imageShow(img)
-          plot(img)
-          if(rv$stage == 2){
-            section_plotter(rv$steps)
+          if(!is.null(input$img_select)){
+            f <- input$img_select %>% as.character
+            print(f)
+            #f <- rv$images[rv$imi] %>% as.character
+            img <- EBImage::readImage(f)
+            #img <- OpenImageR::readImage(f)
+            #OpenImageR::imageShow(img)
+            plot(img)
+            if(rv$stage == 2){
+              section_plotter(rv$steps)
+            }
           }
         }
       }
@@ -509,7 +539,7 @@ img_sections <- function(url_steps,
 
     output$imgname <- renderText({
       paste0('Image ',rv$imi,' out of ',length(rv$images),
-             ' (filtered from ',length(image_files),' image files) :: ',rv$images[rv$imi])
+             ' (filtered from ',length(image_files),' image files)') # ,rv$images[rv$imi])
     })
 
     # -------------------------------------------------------------------
@@ -535,7 +565,7 @@ img_sections <- function(url_steps,
 
     observeEvent(input$save, {
       isolate({
-        img_file <- rv$images[rv$imi]
+        img_file <- input$img_select # rv$images[rv$imi]
 
         # Handle stage 1
         rvsteps <- rv$steps
@@ -582,6 +612,7 @@ img_sections <- function(url_steps,
     })
 
     observeEvent(rv$imi, {
+      print(rv$imi)
       isolate({
         if(rv$imi > length(rv$images)){
           rv$imi <- 1
