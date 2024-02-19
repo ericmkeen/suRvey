@@ -134,6 +134,9 @@ img_sections <- function(url_steps,
     br(),
     fluidRow(column(12,textOutput("imgname"))),
     hr(),
+    fluidRow(column(12, uiOutput('section_table_title'))),
+    fluidRow(column(12, DT::DTOutput('section_table'))),
+    hr(),
     br()
   )
 
@@ -159,6 +162,7 @@ img_sections <- function(url_steps,
     rv$sections <- data.frame()
     rv$stage <- 1
     rv$cat_logger <- 1
+    rv$cat_label_input <- 'starting value'
 
     # Stage 1 work =============================================================
 
@@ -258,7 +262,9 @@ img_sections <- function(url_steps,
       if(rv$stage == 2){
         fluidRow(column(4, htmlOutput('sections')),
                  uiOutput('cats'),
-                 column(2, uiOutput('cats_save')))
+                 uiOutput('cats2'),
+                 column(1, uiOutput('cats_save')),
+                 column(1, uiOutput('cats_back')))
       }
     })
 
@@ -279,9 +285,9 @@ img_sections <- function(url_steps,
 
     output$cats <- shiny::renderUI({
       rv$cat_logger # place here to trigger re-run
-
       if(rv$stage == 2){
-        lapply(1:nrow(cats),
+        #lapply(1:nrow(cats),
+        lapply(1:1,
                function(x){
                  shiny::column(2,
                                shiny::selectInput(paste0('cat_',cats$label[x]),
@@ -293,11 +299,67 @@ img_sections <- function(url_steps,
       }
     })
 
+    # Get the value of the section scar status input
+    observe({
+      if(rv$stage == 2){
+        inputs <- shiny::reactiveValuesToList(input) # get list of all inputs
+        input_name <- paste0('cat_',cats$label[1])
+        input_x <- which(names(inputs) == input_name)
+        if(length(input_x)>0){
+          inputx <- inputs[[input_x]]
+          if(inputx != rv$cat_label_input){
+            rv$cat_label_input <- inputx
+          }
+        }
+      }
+    })
+
+    output$cats2 <- shiny::renderUI({
+      rv$cat_logger # place here to trigger re-run
+      if(rv$stage == 2){
+        #inputs <- shiny::reactiveValuesToList(input) # get list of all inputs
+        #input_name <- paste0('cat_',cats$label[1])
+        #input_x <- which(names(inputs) == input_name)
+        input_x <- rv$cat_label_input
+        if(!is.null(input_x)){
+          inputx <- input_x
+          #inputx <- inputs[[input_x]]
+          if(inputx %in% c('Possible', 'Yes')){
+            lapply(2:nrow(cats),
+                   function(x){
+                     shiny::column(2,
+                                   shiny::selectInput(paste0('cat_',cats$label[x]),
+                                                      label=cats$label[x],
+                                                      choices=stringr::str_split(cats$choices[x],', ')[[1]],
+                                                      #selected = stringr::str_split(cats$choices[x],', ')[[1]][1],
+                                                      #selected = NULL,
+                                                      multiple = TRUE))
+                   })
+          }
+        }
+      }
+    })
+
     output$cats_save <- renderUI({
       if(rv$stage == 2 & rv$cat_logger <= nrow(sections)){
         actionButton('section_save', h4(HTML('Commit for<br/>this section')), width='95%')
-      }else{
+      }
+    })
 
+    output$cats_back <- renderUI({
+      if(rv$stage == 2 & rv$cat_logger > 1 & rv$cat_logger <= nrow(sections) + 1){
+        actionButton('undo_last', h4(HTML('Undo</br>last commit')), width='95%')
+      }
+    })
+
+    observeEvent(input$undo_last, {
+      rv$cat_logger <- rv$cat_logger - 1
+      if(nrow(rv$sections)>0){
+        if(nrow(rv$sections)==1){
+          rv$sections <- data.frame()
+        }else{
+          rv$sections <- rv$sections[1:(nrow(rv$sections) - 1), ]
+        }
       }
     })
 
@@ -310,7 +372,11 @@ img_sections <- function(url_steps,
         for(x in 1:nrow(cats)){
           input_name <- paste0('cat_',cats$label[x])
           input_x <- which(names(inputs) == input_name)
-          inputx <- inputs[[input_x]]
+          if(length(input_x)==0){
+            inputx <- 'X'
+            }else{
+              inputx <- inputs[[input_x]]
+            }
           zinputs[x] <- paste(inputx, collapse=', ')
         }
 
@@ -353,6 +419,19 @@ img_sections <- function(url_steps,
       }
     })
 
+    output$section_table <- DT::renderDataTable({
+      if(rv$stage == 2 & !is.null(rv$sections)){
+        rv$sections
+      }
+    })
+
+    output$section_table_title <- renderUI({
+      if(rv$stage == 2 && !is.null(rv$sections) && nrow(rv$sections)>0){
+        #HTML('h3(Sections analyzed so far:)')
+        h3('Sections analyzed so far:')
+        #HTML(h3('Sections analyzed so far:'))
+      }
+    })
 
     ############################################################################
     # Update measures
