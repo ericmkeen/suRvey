@@ -399,7 +399,7 @@ img_sections <- function(url_steps,
             }else{
               inputx <- inputs[[input_x]]
             }
-          zinputs[x] <- paste(inputx, collapse=', ')
+          zinputs[x] <- paste(inputx, collapse='; ')
         }
 
         # Check for missing data
