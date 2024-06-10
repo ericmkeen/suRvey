@@ -43,16 +43,25 @@ shoreline_finder <- function(shoreline,
     # Determine boundary type & distance
     xy <- data.frame(x=c(platform_x, horline_end[2]),
                      y=c(platform_y, horline_end[1]))
-    horline <- st_linestring(x=as.matrix(xy), dim='XY')
+    xy %>% head
+    horline <-
+      xy %>%
+      st_as_sf(coords = c("x", "y"), na.fail = FALSE, dim = 'XY', crs = "epsg:4326") %>%
+      st_combine %>%
+      st_cast('LINESTRING')
+    horline
 
     # Get intersections
-    intersections <-
+    suppressMessages({
+      intersections <-
       sf::st_intersection(horline,
                           st_cast(shoreline, "MULTILINESTRING", group_or_split = FALSE))
+    })
+
 
     # Plot it
     if(toplot){
-      lines(horline)
+      plot(horline, add = TRUE)
       plot(intersections, add = TRUE, col = "red", pch = 21)
     }
 
