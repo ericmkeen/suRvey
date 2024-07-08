@@ -7,7 +7,7 @@
 #' @param d Degrees down from the horizontal plane to the waterline of the sighting.
 #' @param t The precision of the survey instrument, e.g., a theodolite, in degrees. The default is the degrees-equivalent of plus-or-minus 2 arc-seconds, which is a fairly common error rating for digital theodolites.
 #'
-#' @return A `data.frame` with all input values as well as true distance to the sighting and spatial error details.
+#' @return A `data.frame` with all input values as well as true distance to the sighting and spatial error details (both near-far and left-right).
 #'
 #' @author Mary Margaret Lemburg and Eric Keen Ezell, May 2024
 #' @example
@@ -53,13 +53,21 @@ spatial_error <- function(p,
     error_km <- abs(km_max - km_min) # in km
     error_m <- error_km * 1000
 
-    df <- data.frame(platfrom_height_m=c(p),
+    # Get horizontal error
+    d
+    km_true
+    t_rad <- t*(pi/180)
+    (error_km_leftright <- 2*(tan(t_rad) / km_true))
+    (error_m_leftright <- error_km_leftright * 1000)
+
+    df <- data.frame(platform_height_m=c(p),
                      degrees_below_horizon=c(d),
                      precision = t,
                      km_true=c(km_true),
                      km_min=c(km_min),
                      km_max=c(km_max),
-                     error_m=c(error_m))
+                     error_m=c(error_m),
+                     error_m_leftright = error_m_leftright)
     return(df)
   }
 

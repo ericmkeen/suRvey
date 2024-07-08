@@ -1614,5 +1614,6 @@ survey_app <- function(observers,
 
   shinyApp(ui,
            server,
-           onStart)
+           onStart,
+           options = list(launch.browser = TRUE))
 }
