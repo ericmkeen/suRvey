@@ -2,7 +2,7 @@
 % Please edit documentation in R/spatial_error.R
 \name{spatial_error}
 \alias{spatial_error}
-\title{Determine spatial error of a sighting location}
+\title{Determine spatial error of a sighting localization}
 \usage{
 spatial_error(p, d, t = 0.000555556)
 }
@@ -14,12 +14,12 @@ spatial_error(p, d, t = 0.000555556)
 \item{t}{The precision of the survey instrument, e.g., a theodolite, in degrees. The default is the degrees-equivalent of plus-or-minus 2 arc-seconds, which is a fairly common error rating for digital theodolites.}
 }
 \value{
-A \code{data.frame} with all input values as well as true distance to the sighting and spatial error details.
+A \code{data.frame} with all input values as well as true distance to the sighting and spatial error details (both near-far and left-right).
 }
 \description{
 This function uses the platform height & degrees down to the sighting
 from the horizontal plane in order to determine the spatial error of the survey instrument, e.g., a theodolite.
 }
 \author{
-Mary Margaret Lemburg and Eric Keen Ezell
+Mary Margaret Lemburg and Eric Keen Ezell, May 2024
 }
