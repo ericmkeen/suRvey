@@ -1,6 +1,6 @@
 Package: suRvey
 Title: Data Entry App for Wildlife Surveys
-Version: 2.2
+Version: 2.3
 Authors@R: 
     person("Eric", "Keen Ezell", , "ekezell@sewanee.edu", role = c("aut", "cre"))
 Description: Data entry app for wildlife surveys, optimized for touch screen.

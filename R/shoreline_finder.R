@@ -26,6 +26,12 @@ shoreline_finder <- function(shoreline,
 
   if(toplot){
     plot(shoreline)
+    platform_x = -129.3720833
+    platform_y = 53.23690
+    min_km = 0.5
+    sightline_km = 50
+    verbose = TRUE
+    toplot = FALSE
   }
 
   if(verbose & length(bearing)>3){pb <- txtProgressBar(1, length(bearing), style=3)} # setup progress bar
@@ -53,6 +59,8 @@ shoreline_finder <- function(shoreline,
 
     # Get intersections
     suppressMessages({
+      st_crs(shoreline) <- st_crs(horline)
+      st_crs(shoreline)
       intersections <-
       sf::st_intersection(horline,
                           st_cast(shoreline, "MULTILINESTRING", group_or_split = FALSE))
