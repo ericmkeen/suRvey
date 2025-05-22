@@ -24,14 +24,17 @@ shoreline_finder <- function(shoreline,
                              verbose = TRUE,
                              toplot = FALSE){
 
-  if(toplot){
-    plot(shoreline)
+  if(FALSE){
     platform_x = -129.3720833
     platform_y = 53.23690
     min_km = 0.5
     sightline_km = 50
     verbose = TRUE
     toplot = FALSE
+  }
+
+  if(toplot){
+    plot(shoreline)
   }
 
   if(verbose & length(bearing)>3){pb <- txtProgressBar(1, length(bearing), style=3)} # setup progress bar

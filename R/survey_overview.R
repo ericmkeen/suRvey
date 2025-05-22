@@ -28,7 +28,8 @@ survey_overview <- function(survey_date = NULL,
                             time_zone = "Canada/Pacific"){
 
   if(FALSE){ # for debugging -- not run!
-    survey_date <- '2023-09-29'
+    setwd("/Users/ekezell/Desktop/projects/suRvey/fin 2024")
+    survey_date <- '2024-09-29'
     time_zone <- 'Canada/Pacific'
     result <- survey_overview(survey_date)
     survey_date <- NULL
@@ -227,6 +228,9 @@ survey_overview <- function(survey_date = NULL,
   # Condition zones ============================================================
 
   (sea <- df %>% dplyr::filter(event == 'SEA'))
+  sea$V7 %>% table
+  sea$V7 %>% table
+  sea$V8 %>% table
   sea <-
     sea %>%
     dplyr::select(date,

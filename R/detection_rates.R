@@ -29,8 +29,13 @@ detection_rates <- function(scans,
     (scani$week <- lubridate::week(scani$start))
 
     # Filter scans
-    scani <- scani %>% filter(vis_percent >= 50,
-                              bft <= max_bft)
+    if(!is.null(min_vis)){
+      scani <- scani %>% filter(vis_percent >= min_vis)
+    }
+    if(!is.null(max_bft)){
+      scani <- scani %>% filter(bft <= max_bft)
+    }
+
 
     # Filter sightings to viable scans
     (viable_scans <- scani$scan_key %>% unique)
