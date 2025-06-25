@@ -28,8 +28,8 @@ survey_overview <- function(survey_date = NULL,
                             time_zone = "Canada/Pacific"){
 
   if(FALSE){ # for debugging -- not run!
-    setwd("/Users/ekezell/Desktop/projects/suRvey/fin 2024")
-    survey_date <- '2024-09-29'
+    setwd("/Users/ekezell/Desktop/projects/suRvey/fin 2025")
+    survey_date <- '2025-06-15'
     time_zone <- 'Canada/Pacific'
     result <- survey_overview(survey_date)
     survey_date <- NULL
@@ -243,13 +243,14 @@ survey_overview <- function(survey_date = NULL,
                   bft = V7,
                   wave = V8,
                   vis = V9,
-                  precip = V10,
-                  fog = V11,
-                  haze = V12,
-                  smear = V13,
-                  glare = V14,
-                  glare_left = V15,
-                  glare_right = V16) %>%
+                  cloud = V10,
+                  precip = V11,
+                  fog = V12,
+                  haze = V13,
+                  smear = V14,
+                  glare = V15,
+                  glare_left = V16,
+                  glare_right = V17) %>%
     dplyr::mutate(date = lubridate::as_datetime(date) %>%
                     lubridate::force_tz(tzone=time_zone),
                   scan_id,

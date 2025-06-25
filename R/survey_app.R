@@ -310,12 +310,12 @@ survey_app <- function(observers,
 
     # Try it
     suRvey::survey_app(observers,
-               platforms,
-               optics,
-               landmarks,
-               cues,
-               species,
-               behaviours)
+                       platforms,
+                       optics,
+                       landmarks,
+                       cues,
+                       species,
+                       behaviours)
     #
 
     # function defaults
@@ -595,7 +595,7 @@ survey_app <- function(observers,
                                    fluidRow(column(4, actionButton('sit_photo','Got photo @ this bearing',style=textstyle(button_size*.6, button_padding*.6), width="100%")),
                                             column(1),
                                             column(7, actionButton('sit_store','Store new sighting',style=textstyle(button_size*.8, button_padding*.6), width="100%")),
-                                            ),
+                                   ),
                                    br(),
                                    width = 12) # end of box
 
@@ -616,8 +616,8 @@ survey_app <- function(observers,
                                                    h4('Measured with'), radio('up_reticle_how', NULL, c(optics), height='120px')),
                                             column(4,
                                                    h4('New distance (km)'), uiOutput('up_distance'),
-                                                  br(),
-                                                  actionButton('up_photo', 'Got photo @ this bearing', style=textstyle(button_size*.5, button_padding*.6), width="95%"))),
+                                                   br(),
+                                                   actionButton('up_photo', 'Got photo @ this bearing', style=textstyle(button_size*.5, button_padding*.6), width="95%"))),
                                    hr(),
                                    fluidRow(column(3,
                                                    h4('Add estimate from:'), radio('up_obs', NULL, observers, height='100px')),
@@ -627,8 +627,8 @@ survey_app <- function(observers,
                                             column(2, h4('Min. group size'), uiOutput('up_min')),
                                             column(2, h4('Best estimate'), uiOutput('up_best'))),
                                    hr(),
-                                   fluidRow(column(4,
-                                                   h4('Mixed-spp group?'), radio('up_mixed', NULL, choices=c('No', 'Mixed'), default_choices = NULL, height='120px')),
+                                   fluidRow(column(2, h4('Fix species?'), uiOutput('up_spp1')),
+                                            column(2, h4('Mixed-spp group?'), radio('up_mixed', NULL, choices=c('No', 'Mixed'), default_choices = NULL, height='120px')),
                                             column(2, h4('2nd spp:'), uiOutput('up_spp2')),
                                             column(2, h4('% of group:'), radio('up_per2', NULL, choices=round(seq(99,1,by=-5)), default_choices= NULL, height='150px')),
                                             column(2, h4('3rd spp:'), uiOutput('up_spp3')),
@@ -689,7 +689,7 @@ survey_app <- function(observers,
                                                        br(), DTOutput('sea')),
                                               tabPanel(h5('Comments'),
                                                        br(), DTOutput('comments'))
-                                              )),
+                                            )),
                                    tabPanel(h4('Raw data'),
                                             br(),
                                             DTOutput('data'),
@@ -1068,21 +1068,38 @@ survey_app <- function(observers,
       button_label <- ifelse(is.null(rv$grp_max), grabit, rv$grp_max)
       actionButton("grp_max", label=button_label, style=textstyle(button_size*.7, button_padding*.5), width="95%")
     })
-    observeEvent(input$grp_max,{ isolate({ rv$grp_max <- rv$keypad  ; rv$keypad <- '0' ; rv$grp_min <- rv$grp_best <- rv$grp_max }) })
+    observeEvent(input$grp_max,{ isolate({
+      rv$grp_max <- as.numeric(rv$keypad)
+      rv$keypad <- '0'
+      if(rv$grp_min > rv$grp_max){rv$grp_min <- rv$grp_max}
+      if(rv$grp_best > rv$grp_max){
+        rv$grp_best <- rv$grp_max
+      }else{
+        rv$grp_best <- round(mean(as.numeric(c(rv$grp_min, rv$grp_max))))
+      }
+      #rv$grp_min <- rv$grp_best <- rv$grp_max
+    }) })
 
     # Group min
     output$grp_min <- renderUI({
       button_label <- ifelse(is.null(rv$grp_min), grabit, rv$grp_min)
       actionButton("grp_min", label=button_label, style=textstyle(button_size*.7, button_padding*.5), width="95%")
     })
-    observeEvent(input$grp_min,{ isolate({ rv$grp_min <- min(c(rv$grp_max, rv$keypad))  ; rv$keypad <- '0' ; rv$grp_best <- round(mean(as.numeric(c(rv$grp_min, rv$grp_max)))) }) })
+    observeEvent(input$grp_min,{ isolate({
+      rv$grp_min <- min(c(rv$grp_max, as.numeric(rv$keypad)))
+      rv$keypad <- '0'
+      rv$grp_best <- round(mean(as.numeric(c(rv$grp_min, rv$grp_max))))
+    }) })
 
     # Group best
     output$grp_best <- renderUI({
       button_label <- ifelse(is.null(rv$grp_best), grabit, rv$grp_best)
       actionButton("grp_best", label=button_label, style=textstyle(button_size*.7, button_padding*.5), width="95%")
     })
-    observeEvent(input$grp_best,{ isolate({ rv$grp_best <- max(as.numeric(c(rv$grp_min, min(as.numeric(c(rv$keypad, rv$grp_max))))))  ; rv$keypad <- '0' }) })
+    observeEvent(input$grp_best,{ isolate({
+      rv$grp_best <- max(as.numeric(c(rv$grp_min, min(as.numeric(c(rv$keypad, rv$grp_max))))))
+      rv$keypad <- '0'
+    }) })
 
     # Estimated distance
     output$distance <- renderUI({
@@ -1258,6 +1275,11 @@ survey_app <- function(observers,
       radio('up_tertiary', NULL, c('N/A', behaviours[[list_id]]), width='95%', height='160px')
     })
 
+    output$up_spp1 <- renderUI({
+      list_id <- which(names(species) == input$species_type)
+      radio('up_spp1', NULL, c('N/A', species[[list_id]]), width='95%', height='160px')
+    })
+
     output$up_spp2 <- renderUI({
       list_id <- which(names(species) == input$species_type)
       radio('up_spp2', NULL, c('N/A', species[[list_id]]), width='95%', height='160px')
@@ -1296,7 +1318,7 @@ survey_app <- function(observers,
                       distance,
                       input$up_obs, input$up_changed,
                       input$up_max, input$up_min, input$up_best,
-                      input$up_mixed, input$up_spp2, input$up_per2, input$up_spp3, input$up_per3,
+                      input$up_spp1, input$up_mixed, input$up_spp2, input$up_per2, input$up_spp3, input$up_per3,
                       input$up_primary, input$up_secondary, input$up_tertiary, input$up_direction,
                       input$up_threat, input$up_acoustics,
                       rv$up_photo)
@@ -1333,7 +1355,7 @@ survey_app <- function(observers,
     # Comment
 
     # Show species table
-    output$com_spp_table = DT::renderDT( rv$df %>% dplyr::filter(V2=='SIT'),
+    output$com_spp_table = DT::renderDT( rv$df %>% dplyr::filter(V2 %in% c('SIT', 'UPD')),
                                          extensions = 'Scroller',
                                          options=list(searching = TRUE,
                                                       autoWidth = TRUE,
@@ -1433,24 +1455,6 @@ survey_app <- function(observers,
     # Review - Overview
 
     output$scans = DT::renderDT( rv$overview$scans,
-                                extensions = 'Scroller',
-                                options=list(searching = TRUE,
-                                             autoWidth = TRUE,
-                                             columnDefs = list(list(width = '50px', targets = "_all")),
-                                             rownames = FALSE,
-                                             scroller = TRUE,
-                                             scrollX = "400px",
-                                             scrollY = "300px",
-                                             fixedHeader = TRUE,
-                                             class = 'cell-border stripe',
-                                             fixedColumns = list(
-                                               leftColumns = 3,
-                                               heightMatch = 'none'
-                                             )),
-                                editable=FALSE)
-
-
-    output$sits = DT::renderDT( rv$overview$sightings,
                                  extensions = 'Scroller',
                                  options=list(searching = TRUE,
                                               autoWidth = TRUE,
@@ -1467,7 +1471,8 @@ survey_app <- function(observers,
                                               )),
                                  editable=FALSE)
 
-    output$sea = DT::renderDT( rv$overview$conditions,
+
+    output$sits = DT::renderDT( rv$overview$sightings,
                                 extensions = 'Scroller',
                                 options=list(searching = TRUE,
                                              autoWidth = TRUE,
@@ -1484,22 +1489,39 @@ survey_app <- function(observers,
                                              )),
                                 editable=FALSE)
 
+    output$sea = DT::renderDT( rv$overview$conditions,
+                               extensions = 'Scroller',
+                               options=list(searching = TRUE,
+                                            autoWidth = TRUE,
+                                            columnDefs = list(list(width = '50px', targets = "_all")),
+                                            rownames = FALSE,
+                                            scroller = TRUE,
+                                            scrollX = "400px",
+                                            scrollY = "300px",
+                                            fixedHeader = TRUE,
+                                            class = 'cell-border stripe',
+                                            fixedColumns = list(
+                                              leftColumns = 3,
+                                              heightMatch = 'none'
+                                            )),
+                               editable=FALSE)
+
     output$comments = DT::renderDT( rv$overview$comments,
-                                extensions = 'Scroller',
-                                options=list(searching = TRUE,
-                                             autoWidth = TRUE,
-                                             columnDefs = list(list(width = '50px', targets = "_all")),
-                                             rownames = FALSE,
-                                             scroller = TRUE,
-                                             scrollX = "400px",
-                                             scrollY = "300px",
-                                             fixedHeader = TRUE,
-                                             class = 'cell-border stripe',
-                                             fixedColumns = list(
-                                               leftColumns = 3,
-                                               heightMatch = 'none'
-                                             )),
-                                editable=FALSE)
+                                    extensions = 'Scroller',
+                                    options=list(searching = TRUE,
+                                                 autoWidth = TRUE,
+                                                 columnDefs = list(list(width = '50px', targets = "_all")),
+                                                 rownames = FALSE,
+                                                 scroller = TRUE,
+                                                 scrollX = "400px",
+                                                 scrollY = "300px",
+                                                 fixedHeader = TRUE,
+                                                 class = 'cell-border stripe',
+                                                 fixedColumns = list(
+                                                   leftColumns = 3,
+                                                   heightMatch = 'none'
+                                                 )),
+                                    editable=FALSE)
 
     ##############################################################################
     ##############################################################################
