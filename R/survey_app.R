@@ -777,8 +777,9 @@ survey_app <- function(observers,
             ')), # end of tag
       column(3, h4('Latitude'), verbatimTextOutput("lat")),
       column(3, h4('Longitude'), verbatimTextOutput("long")),
-      column(3, h4('Speed (kmh)'), verbatimTextOutput("speed")),
-      column(3, h4('Time'), verbatimTextOutput("time")))
+      column(2, h4('Speed (kmh)'), verbatimTextOutput("speed")),
+      column(2, h4('Time'), verbatimTextOutput("time")),
+      column(2, h4('Print diagnostics?'), actionButton('debug', 'Debug now', width='100%')))
 
   )
 
@@ -1176,7 +1177,9 @@ survey_app <- function(observers,
           rv$grp_max <- 1 ; rv$grp_min <- 1 ; rv$grp_best <- 1
           rv$sit_photo <- NULL
           shinyjs::reset('inline') ; shinyjs::reset('cue') ; shinyjs::reset('reticle_how')
-          shinyjs::reset('sit_type') ; shinyjs::reset('species')
+          shinyjs::reset('sit_type')
+          #shinyjs::reset('species_type')
+          shinyjs::reset('species')
           shinyjs::reset('bhvr_primary') ; shinyjs::reset('bhvr_secondary') ; shinyjs::reset('bhvr_tertiary') ; shinyjs::reset('direction')
           shinyjs::reset('threat') ; shinyjs::reset('calves') ; shinyjs::reset('males') ; shinyjs::reset('acoustics')
         }
@@ -1625,6 +1628,15 @@ survey_app <- function(observers,
     ##############################################################################
     ##############################################################################
     # Review - Map
+
+
+    ##############################################################################
+    ##############################################################################
+    # Printing diagnostics
+    observeEvent(input$debug,{ isolate({
+      x <- reactiveValuesToList(input)
+      print(x)
+    }) })
 
   }
 
