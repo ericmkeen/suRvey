@@ -824,16 +824,16 @@ survey_app <- function(observers,
     # Sightings =========================
     rv$next_sit <- maxsitno + 1
     rv$bearing <- NULL
-    rv$inline <- NULL
-    rv$cue <- NULL
+    #rv$inline <- NULL
+    #rv$cue <- NULL
     rv$reticle <- NULL
-    rv$reticle_how <- NULL
+    #rv$reticle_how <- NULL
     rv$distance <- NULL
     rv$grp_max <- 1
     rv$grp_min <- 1
     rv$grp_best <- 1
-    rv$species_type <- NULL
-    rv$species <- NULL
+    #rv$species_type <- NULL
+    #rv$species <- NULL
     rv$sit_photo <- NULL
 
     # Update sighting ===================
@@ -1154,6 +1154,10 @@ survey_app <- function(observers,
                         input$cue != 'N/A',
                         input$species != 'N/A')
         print(sit_check2)
+        #print(is.na(input$inline))
+        #print(is.na(input$reticle_how))
+        #print(is.na(input$cue))
+        #print(is.na(input$species))
         if(all(sit_check2)){
           throw_alert <- FALSE
 
