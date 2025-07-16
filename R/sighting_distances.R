@@ -26,7 +26,7 @@ sighting_distances <- function(sits,
 
   if(verbose & nrow(sits)>3){pb <- txtProgressBar(1, nrow(sits), style=3)} # setup progress bar
   kms <- c()
-  i=100
+  i=1
   for(i in 1:nrow(sits)){
     if(verbose & nrow(sits)>3){setTxtProgressBar(pb, i)} # update progress bar
     siti <- sits[i,]

@@ -10,25 +10,30 @@
 #' The default assumption is a file, `measures.csv`, within your working directoy.
 #' If this file does not exist in the specified path, the function will create it.
 #'
+#' @param start_index Index of file to start on.
+#'
+#' @param features Character vector of features to choose from. You can measure multiple features on the same image.
+#'
+#' @param zoom_options Numeric vector of zoom options to choose from; the default will be the first one in your vector.
+#'
 #' @param scroll_width Width, in pixels, of image scrolling portion of the app, to customize the app for your specific screen.
+#'
 #' @param scroll_height Height, in pixels, of image scrolling portion of the app, to customize the app for your specific screen.
 #'
-#' @details This function uses `EBImage` to read and display images. It uses `exifr` and `exiftoolr` to
-#' read image metadata.
+#' @param filter_to_unmeasured Filter images to those without any measurements yet?
+#'
+#' @details This function uses the `magick` package to read and display images.
 #'
 #' Workflow notes:
 #' \itemize{
 #' \item If your photos are large, you can adjust the zoom options and scroll around
 #' the image using your mousepad.
+#' \item To zoom, click-and-drag to create a rectangle, then single-click within it.
+#' \item To unzoom, single-click anywhere on image.
 #' \item Double-click on the whale/boat waterline to grab its pixel location.
-#' \item Single-click on the horizon/shore line to grab its pixel location.
+#' \item Double-click on the horizon/shore line to grab its pixel location.
 #' \item To save these measurements, click the "Save" button that appears.
-#' \item The app will automatically advance to the next image.
-#' \item If you can't take both of those measurements for an image, click the "Can't" button to mark
-#' that image as processed as advance to the next image.
 #' \item Advance to the next image without saving measurements by clicking the "Skip" button.
-#' \item Note that by default, the app will only show images that do not yet
-#' have measurements within the `log_path` file.
 #' \item Close the app by exiting the app window; you may also have to click the 'Stop sign' in
 #' `R` or `RStudio` to end the command completely.
 #' }
@@ -42,16 +47,32 @@
 #' \item Y pixel of whale/boat waterline
 #' \item X pixel of whale/boat (can be useful for refining bearing)
 #' \item System time of when measurement was made
+#' \item Feature (optionally entered manually by user)
+#' \item Latitude (optionally entered manually by user)
+#' \item Longitude (optionally entered manually by user)
+#' \item Elevation (e.g., of drone; optionally entered manually by user)
+#' \item Focal length (optionally entered manually by user)
+#' \item Comment field (optional)
 #' }
 #'
 #' @import shiny
 #' @import dplyr
+#' @import ggplot2
+#' @import magick
 #' @export
 #'
 image_measure <- function(img_path='images/',
                           log_path='measures.csv',
+                          start_index = 1,
+                          features = c('Other',
+                                       'Whale (certain)', 'Whale (maybe)',
+                                       'LNG carrier (bow)', 'LNG carrier (stern)',
+                                       'Tug (bow)', 'Tug (stern)',
+                                       'Vessel (bow)', 'Vessel (stern)'),
+                          zoom_options = c(30, 50, 60, 70, 80, 90, 100, 125, 150, 175, 200, 300),
                           scroll_width = 1700,
-                          scroll_height = 400){
+                          scroll_height = 400,
+                          filter_to_unmeasured = FALSE){
 
   if(FALSE){ #==================================================================
 
@@ -66,21 +87,29 @@ image_measure <- function(img_path='images/',
     log_path <- 'measures.csv'
     scroll_height = 400
     scroll_width = 1700
+    start_index = 1
+    features = c('Other',
+                 'Whale (certain)', 'Whale (maybe)',
+                 'LNG carrier (bow)', 'LNG carrier (stern)',
+                 'Tug (bow)', 'Tug (stern)',
+                 'Vessel (bow)', 'Vessel (stern)')
+
+    zoom_options = c(35, 50, 60, 70, 80, 90, 100, 125, 150, 175, 200, 300)
 
     # Try it
     image_measure()
 
   } #===========================================================================
 
-  if(! 'EBImage' %in% installed.packages()){
-    BiocManager::install("EBImage")
-  }
+  #if(! 'EBImage' %in% installed.packages()){
+  #  BiocManager::install("EBImage")
+  #}
 
   if(! file.exists(log_path)){
     previous_measures <- data.frame()
   }else{
     suppressWarnings({suppressMessages({
-        previous_measures <- readr::read_csv(log_path, col_names=FALSE)
+      previous_measures <- readr::read_csv(log_path, col_names=FALSE)
     })})
   }
 
@@ -88,7 +117,16 @@ image_measure <- function(img_path='images/',
   (image_files <- dir(img_path))
   if(length(image_files) == 0){ stop('No images were found within the images folder!')}
   (image_files <- paste0(img_path, image_files))
+  #image_read(image_files[1]) %>% image_info
 
+  # Filter
+  if(filter_to_unmeasured && nrow(previous_measures)>0){
+    measured_files <- previous_measures$X1
+    not_yet_measured <- ! image_files %in% measured_files
+    image_files <- image_files[not_yet_measured]
+    message(length(image_files),' unmeasured files!')
+    if(length(image_files) == 0){ stop('After filtering, no images need to be measured!')}
+  }
 
   ######################################################################
   ######################################################################
@@ -98,21 +136,24 @@ image_measure <- function(img_path='images/',
   ui <- fluidPage(
     br(),
     fluidRow(
+      column(2, selectInput('feature', label=h4('Feature measured:'),
+                            choices = features,
+                            selected = features[1], width='100%')),
       column(2,uiOutput('save')),
-      column(2,actionButton(inputId="cant",label=h4(HTML("Can't<br/>measure")),width="95%")),
-      column(2,actionButton(inputId="skip",label=h4(HTML("Skip<br/>for now")),width="95%")),
-      column(2,actionButton(inputId="clear",label=h4(HTML("Clear<br/>measures")),width="95%")),
-      column(4,textOutput("imgname"))),
+      column(2,actionButton(inputId="skip",label=h4(HTML("Next<br/>image")),width="95%")),
+      column(4,htmlOutput("imgname")),
+      column(2,selectInput('zoom', label='Set widest zoom %',
+                           choices=as.character(zoom_options),
+                           selected=as.character(zoom_options[1]), width='100%'))),
+    fluidRow(column(12, helpText(HTML('<p style="font-size:11px"><b>Double-click</b> on <span style="color:red"><b>whale/boat waterline</b></span>, then <b>double-click</b> on the <span style="color:green"><b>horizon/shore</b></span> directly above & beyond it.
+                                  Drag & click to zoom; click again to unzoom. Double-click to erase the current measurement.</p>')))),
     hr(),
-    fluidRow(column(4,
-                    helpText(HTML('<b>Double-click</b> on <span style="color:red">whale/boat waterline</span>')),
-                    helpText(HTML('then <b>single-click</b> on the <span style="color:green">horizon/shore</span> directly behind it.'))),
-             column(4,radioButtons('zoom', label='Set zoom %',
-                                    choices=as.character(seq(10,100,by=10)),
-                                    selected='30', width='100%', inline=TRUE)),
-             column(4,checkboxInput('filter', label='Filter to unmeasured images',
-                                    value=TRUE,width='100%'))),
-    hr(),
+    fluidRow(column(1,h4('Image metadata:')),
+             column(2, textInput('lon', label='Lon:', value='-129.', width='100%')),
+             column(2, textInput('lat', label='Lat:', value='53.', width='100%')),
+             column(1, textInput('elev', label='Elev:', value='120', width='100%')),
+             column(2, textInput('focal', label='Foc. Len. (mm):', value='24', width='100%')),
+             column(3, textInput('comm', label='Comment:', value='', width='100%'))),
     fluidRow(column(12,
                     shinydashboard::box(
                       style=paste0('width:',
@@ -122,7 +163,12 @@ image_measure <- function(img_path='images/',
                                    'px; overflow-y: scroll;'),
                       uiOutput('img_show'),
                       width=12))),
+    fluidRow(column(12, verbatimTextOutput('pixels'))),
     hr(),
+    fluidRow(column(12,
+                    h5('Measures already on file for this image:'),
+                    br(),
+                    DT::dataTableOutput("table1"))),
     br()
   )
 
@@ -139,7 +185,8 @@ image_measure <- function(img_path='images/',
     rv$reload <- 0
     rv$images <- image_files
     rv$img <- NULL
-    rv$imi <- 1
+    rv$imi <- start_index
+    rv$imi_measures <- data.frame()
     rv$brng <- NULL # y pixel to whale
     rv$whale <- NULL # x pixel to water line
     rv$shore <- NULL # x pixel to shore/horizon
@@ -152,29 +199,17 @@ image_measure <- function(img_path='images/',
         suppressWarnings({
           suppressMessages({
             rv$previous_measures <- readr::read_csv(log_path, col_names=FALSE)
+            print(rv$previous_measures)
+            isolate({
+              if(nrow(rv$previous_measures)>0){
+                rv$imi_measures <- rv$previous_measures %>% filter(X1 == rv$images[rv$imi])
+                print(rv$imi_measures)
+              }
+            })
           })
         })
       }else{
         rv$previous_measures <- data.frame()
-      }
-    })
-
-    observe({
-      if(input$filter){
-        measured_files <- rv$previous_measures$X1
-        not_yet_measured <- ! image_files %in% measured_files
-        images <- image_files[not_yet_measured]
-      }else{
-        images <- image_files
-      }
-      rv$images <- images
-
-      if(length(rv$images)==0){
-        showModal(modalDialog(
-          'No more images to measure!',
-          title = 'Finished!', footer = modalButton("Dismiss"),
-          size = c("m"), easyClose = TRUE, fade = TRUE
-        ))
       }
     })
 
@@ -185,42 +220,94 @@ image_measure <- function(img_path='images/',
       zoom <- input$zoom %>% as.numeric
       zoom <- as.numeric(zoom / 100)
       f <- rv$images[rv$imi] %>% as.character
-      img <- EBImage::readImage(f)
-      #img <- OpenImageR::readImage(f)
-      plotOutput("plot3",
-                 width=(dim(img)[1] * zoom),
-                 height=(dim(img)[2]) * zoom,
-                 click = clickOpts(id="img_click"),
-                 dblclick = clickOpts(id='img_double'))
+      img1 <- magick::image_read(f)
+      plotOutput("plot1",
+                 width=(image_info(img1)$width * zoom),
+                 height=(image_info(img1)$height * zoom),
+                 dblclick = dblclickOpts(id = "plot1_dblclick"),
+                 click = 'plot1_click',
+                 hover = 'plot1_hover',
+                 brush = brushOpts(
+                   id = "plot1_brush",
+                   resetOnNew = TRUE
+                 ))
     })
 
-    output$plot3 <- renderPlot({
-      if(!is.null(rv$images)){
-        if(length(rv$images)>0){
-        f <- rv$images[rv$imi] %>% as.character
-        img <- EBImage::readImage(f)
-        #img <- OpenImageR::readImage(f)
-        #OpenImageR::imageShow(img)
-        plot(img)
-        if(!is.null(rv$brng)){ abline(v=rv$brng, col='yellow', lwd=3) }
-        if(!is.null(rv$whale)){ abline(h=rv$whale, col='red', lwd=3) }
-        if(!is.null(rv$shore)){ abline(h=rv$shore, col='green', lwd=3) }
+    # -------------------------------------------------------------------
+    ranges <- reactiveValues(x = NULL, y = NULL)
+
+    output$plot1 <- renderPlot({
+      f <- rv$images[rv$imi] %>% as.character
+      img1 <- magick::image_read(f)
+
+      p <- image_ggplot(img1)
+
+      if(nrow(rv$imi_measures)>0){
+        p <- p +
+          geom_point(data=rv$imi_measures, mapping=aes(x=X6, y=X4), color='yellow', size=3, pch='+') +
+          geom_point(data=rv$imi_measures, mapping=aes(x=X6, y=X5), color='yellow', size=3, pch='+') +
+          geom_segment(data=rv$imi_measures, mapping = aes(x=X6, xend=X6, y=X4, yend=X5), color='yellow', lwd=.25)
+      }
+
+      if(!is.null(rv$brng)){
+        message('rv$brng is ', rv$brng)
+        p <- p + geom_point(mapping=aes(x=rv$brng, y=rv$whale), color='red', size=5, pch='+')
+
+        if(is.null(rv$shore)){
+          p <- p + geom_segment(mapping = aes(x=rv$brng, xend=rv$brng,
+                                              y=rv$whale, yend=image_info(img1)$height), color='red', lwd=.5)
+        }else{
+          p <- p + geom_segment(mapping = aes(x=rv$brng, xend=rv$brng,
+                                              y=rv$whale, yend=rv$shore), color='red', lwd=.5) +
+            geom_point(mapping=aes(x=rv$brng, y=rv$shore), color='green', size=5, pch='+')
         }
+      }
+
+      if(is.null(ranges$x)){
+        p
+      }else{
+        p +
+          coord_cartesian(xlim = ranges$x, ylim = ranges$y, expand = FALSE)
+      }
+    })
+
+    # When a click happens, check if there's a brush on the plot.
+    # If so, zoom to the brush bounds; if not, reset the zoom.
+    observeEvent(input$plot1_click, {
+      brush <- input$plot1_brush
+      print(brush)
+      if (!is.null(brush)) {
+        ranges$x <- c(brush$xmin, brush$xmax)
+        ranges$y <- c(brush$ymin, brush$ymax)
+      } else {
+        ranges$x <- ranges$y <- NULL
       }
     })
 
     # -------------------------------------------------------------------
     # Get measurements
 
-    observeEvent(input$img_double, {
-      isolate({
-        if(is.null(rv$brng) & is.null(rv$whale)){
-          if(!is.null(input$img_double)){
-            rv$brng <- input$img_double$x
-            rv$whale <- input$img_double$y
+    # Store data on DOUBLE CLICK
+    observeEvent(input$plot1_dblclick, {
+      if (!is.null(input$plot1_dblclick)) {
+        dblclick <- input$plot1_dblclick
+        message('New double click!')
+        message('X = ', print(dblclick$x),
+                '\nY = ', print(dblclick$y))
+        isolate({
+          if(is.null(rv$brng)){
+            rv$brng <- dblclick$x
+            rv$whale <- dblclick$y
+          }else{
+            if(is.null(rv$shore)){
+              rv$shore <- dblclick$y
+            }else{
+              # reset all values
+              rv$brng <- rv$whale <- rv$shore <- NULL
+            }
           }
-        }
-      })
+        })
+      }
     })
 
     observeEvent(input$img_click, {
@@ -237,8 +324,11 @@ image_measure <- function(img_path='images/',
     # Show info
 
     output$imgname <- renderText({
-        paste0('Image ',rv$imi,' out of ',length(rv$images),
-              ' (filtered from ',length(image_files),' image files) :: ',rv$images[rv$imi])
+      paste0('Image ',rv$imi,' out of ',length(rv$images),
+             ' (filtered from ',length(image_files),
+             ' image files) :: ','<br><br>',
+             '<B><p style="font-size:12px">',rv$images[rv$imi],'</p></B>')
+
     })
 
     # -------------------------------------------------------------------
@@ -255,26 +345,40 @@ image_measure <- function(img_path='images/',
                       !is.null(rv$whale),
                       !is.null(rv$brng))
       if(all(null_tests)){
-        actionButton(inputId="save",label=h3(HTML("Save & Next")),width="95%")
+        actionButton(inputId="save",label=h3(HTML("Save measure")),width="95%")
       }else{
-        helpText(HTML('Cannot save until <b>both</b> the horizon/shore <b>and</b> the whale/boat waterline have been measured.'))
+        helpText(HTML('Nothing measured yet.'))
       }
     })
 
     observeEvent(input$save, {
       isolate({
         img_file <- rv$images[rv$imi]
-        newline <- c(img_file, round(rv$shore), round(rv$whale), round(rv$brng), as.character(Sys.time()))
+        img1 <- magick::image_read(img_file)
+
+        newline <- c(img_file,
+                     image_info(img1)$width,
+                     image_info(img1)$height,
+                     round(rv$shore),
+                     round(rv$whale),
+                     round(rv$brng),
+                     as.character(Sys.time()),
+                     input$feature,
+                     input$lat,
+                     input$lon,
+                     input$elev,
+                     input$focal,
+                     input$comm)
         newline <- paste(newline, collapse=',')
         newline <- paste0(newline,'\n')
         #print(newline)
         cat(newline, file=log_path, append = TRUE)
         rv$reload <- rv$reload + 1
-        if(!input$filter){rv$imi <- rv$imi + 1}
+        #if(!input$filter){rv$imi <- rv$imi + 1}
         rv$brng <- NULL
         rv$whale <- NULL
         rv$shore <- NULL
-        shinyjs::reset('zoom')
+        #shinyjs::reset('zoom')
       })
     })
 
@@ -286,7 +390,20 @@ image_measure <- function(img_path='images/',
         if(is.null(rv$shore)){rv$shore <- NA}
 
         img_file <- rv$images[rv$imi]
-        newline <- c(img_file, round(rv$shore), round(rv$whale), round(rv$brng), as.character(Sys.time()))
+        img1 <- magick::image_read(img_file)
+        newline <- c(img_file,
+                     image_info(img1)$width,
+                     image_info(img1)$height,
+                     round(rv$shore),
+                     round(rv$whale),
+                     round(rv$brng),
+                     as.character(Sys.time()),
+                     input$feature,
+                     input$lat,
+                     input$lon,
+                     input$elev,
+                     input$focal,
+                     input$comm)
         newline <- paste(newline, collapse=',')
         newline <- paste0(newline,'\n')
         #print(newline)
@@ -296,7 +413,7 @@ image_measure <- function(img_path='images/',
         rv$brng <- NULL
         rv$whale <- NULL
         rv$shore <- NULL
-        shinyjs::reset('zoom')
+        #shinyjs::reset('zoom')
       })
     })
 
@@ -305,6 +422,13 @@ image_measure <- function(img_path='images/',
       rv$brng <- NULL
       rv$whale <- NULL
       rv$shore <- NULL
+      rv$imi_measures <- data.frame()
+      shinyjs::reset('feature')
+      shinyjs::reset('lat')
+      shinyjs::reset('lon')
+      shinyjs::reset('elev')
+      shinyjs::reset('focal')
+      shinyjs::reset('comm')
       shinyjs::reset('zoom')
     })
 
@@ -313,9 +437,17 @@ image_measure <- function(img_path='images/',
         if(rv$imi > length(rv$images)){
           rv$imi <- 1
         }
+        isolate({
+          if(nrow(previous_measures)>0){
+            rv$imi_measures <- rv$previous_measures %>% filter(X1 == rv$images[rv$imi])
+          }
+        })
       })
     })
 
+    output$table1 <- renderDataTable({
+      DT::datatable(rv$imi_measures)
+    })
   }
 
   ######################################################################

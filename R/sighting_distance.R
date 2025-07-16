@@ -22,6 +22,12 @@ sighting_distance <- function(platform_height,
     reticles <- 0.5
     R <- 6364.5
     h <- 6.392
+
+    km_ref <- 9.868
+    deg.per.ret <- 1
+    reticles <- 7.58333
+    R <- 6364.5
+    h <- 120
   }
 
   # convert reticles to radians

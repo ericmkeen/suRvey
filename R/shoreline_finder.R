@@ -30,7 +30,7 @@ shoreline_finder <- function(shoreline,
     min_km = 0.5
     sightline_km = 50
     verbose = TRUE
-    toplot = FALSE
+    toplot = TRUE
   }
 
   if(toplot){
@@ -43,15 +43,24 @@ shoreline_finder <- function(shoreline,
 
     if(verbose & length(bearing)>3){setTxtProgressBar(pb, i)} # update progress bar
 
-    horline_end <- swfscMisc::destination(lat = platform_y,
-                                          lon = platform_x,
+    platy <- platform_y
+    platx <- platform_x
+    if(length(platform_y)>1){
+      platy <- platform_y[i]
+    }
+    if(length(platform_x)>1){
+      platx <- platform_x[i]
+    }
+
+    horline_end <- swfscMisc::destination(lat = platy,
+                                          lon = platx,
                                           brng = bearing[i],
                                           distance = sightline_km)
     horline_end
 
     # Determine boundary type & distance
-    xy <- data.frame(x=c(platform_x, horline_end[2]),
-                     y=c(platform_y, horline_end[1]))
+    xy <- data.frame(x=c(platx, horline_end[2]),
+                     y=c(platy, horline_end[1]))
     xy %>% head
     horline <-
       xy %>%
@@ -83,8 +92,8 @@ shoreline_finder <- function(shoreline,
     intersections$km <-
       apply(data.frame(intersections$Y, intersections$X), 1,
             function(yx){
-              swfscMisc::distance(lat1 = platform_y,
-                                  lon1 = platform_x,
+              swfscMisc::distance(lat1 = platy,
+                                  lon1 = platx,
                                   lat2 = yx[1],
                                   lon2 = yx[2],
                                   units = 'nm') * 1.852
