@@ -99,9 +99,43 @@ mr %>% head
 
 ################################################################################
 ################################################################################
+# Add 2025
+
+subdir <- "/Users/ekezell/Desktop/projects/suRvey/fin 2025/tides/"
+(lf <- list.files(subdir))
+(lfs <- paste0(subdir, lf))
+lfs
+mr <- data.frame()
+for(i in 1:length(lfs)){
+  (lfi <- lfs[i])
+  message(lfi)
+  mri <- read.csv(lfi)
+  mr <- rbind(mr, mri)
+}
+nrow(mr)
+mr %>% head
+
+mr <-
+  mr %>%
+  mutate(station = 'HARTLEY BAY') %>%
+  mutate(date = lubridate::as_datetime(paste0(Date,':00'))) %>%
+  mutate(tide = `predictions..m.`) %>%
+  select(station, date, tide) %>%
+  group_by(station, date) %>%
+  summarize(tide = tide[1] %>% as.numeric()) %>%
+  ungroup()
+mr %>% head
+mr$date <-  lubridate::force_tz(mr$date, tzone='Canada/Pacific')
+ggplot(mr, aes(x=date, y=tide)) + geom_point(size=.01)
+mr %>% head
+
+################################################################################
+################################################################################
 # Save dataset
 
 data(tides)
+tides %>% head
+tides %>% tail
 tides <- rbind(tides, mr)
 #tides$date %>% plot
 
@@ -110,7 +144,8 @@ tides <-
   tides %>%
   group_by(station, date) %>%
   summarize(tide = tide[1]) %>%
-  arrange(station, date)
+  arrange(station, date) %>%
+  filter(!is.na(tide))
 
 head(tides)
 tail(tides)

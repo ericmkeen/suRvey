@@ -7,8 +7,13 @@
 image_measure(
   img_path = "images/",
   log_path = "measures.csv",
+  start_index = 1,
+  features = c("Other", "Whale (certain)", "Whale (maybe)", "LNG carrier (bow)",
+    "LNG carrier (stern)", "Tug (bow)", "Tug (stern)", "Vessel (bow)", "Vessel (stern)"),
+  zoom_options = c(30, 50, 60, 70, 80, 90, 100, 125, 150, 175, 200, 300),
   scroll_width = 1700,
-  scroll_height = 400
+  scroll_height = 400,
+  filter_to_unmeasured = FALSE
 )
 }
 \arguments{
@@ -19,9 +24,17 @@ a folder named "\code{images}" within your working directory.}
 The default assumption is a file, \code{measures.csv}, within your working directoy.
 If this file does not exist in the specified path, the function will create it.}
 
+\item{start_index}{Index of file to start on.}
+
+\item{features}{Character vector of features to choose from. You can measure multiple features on the same image.}
+
+\item{zoom_options}{Numeric vector of zoom options to choose from; the default will be the first one in your vector.}
+
 \item{scroll_width}{Width, in pixels, of image scrolling portion of the app, to customize the app for your specific screen.}
 
 \item{scroll_height}{Height, in pixels, of image scrolling portion of the app, to customize the app for your specific screen.}
+
+\item{filter_to_unmeasured}{Filter images to those without any measurements yet?}
 }
 \value{
 This function will launch a \code{Shiny} app. As you store measurements,
@@ -33,6 +46,12 @@ measurements follows this comma-separated format:
 \item Y pixel of whale/boat waterline
 \item X pixel of whale/boat (can be useful for refining bearing)
 \item System time of when measurement was made
+\item Feature (optionally entered manually by user)
+\item Latitude (optionally entered manually by user)
+\item Longitude (optionally entered manually by user)
+\item Elevation (e.g., of drone; optionally entered manually by user)
+\item Focal length (optionally entered manually by user)
+\item Comment field (optional)
 }
 }
 \description{
@@ -40,22 +59,18 @@ This function launches a Shiny app that allows you to quickly measure the pixel 
 of the waterline of a whale/boat and the horizon/shoreline directly behind it in a set of images.
 }
 \details{
-This function uses \code{EBImage} to read and display images. It uses \code{exifr} and \code{exiftoolr} to
-read image metadata.
+This function uses the \code{magick} package to read and display images.
 
 Workflow notes:
 \itemize{
 \item If your photos are large, you can adjust the zoom options and scroll around
 the image using your mousepad.
+\item To zoom, click-and-drag to create a rectangle, then single-click within it.
+\item To unzoom, single-click anywhere on image.
 \item Double-click on the whale/boat waterline to grab its pixel location.
-\item Single-click on the horizon/shore line to grab its pixel location.
+\item Double-click on the horizon/shore line to grab its pixel location.
 \item To save these measurements, click the "Save" button that appears.
-\item The app will automatically advance to the next image.
-\item If you can't take both of those measurements for an image, click the "Can't" button to mark
-that image as processed as advance to the next image.
 \item Advance to the next image without saving measurements by clicking the "Skip" button.
-\item Note that by default, the app will only show images that do not yet
-have measurements within the \code{log_path} file.
 \item Close the app by exiting the app window; you may also have to click the 'Stop sign' in
 \code{R} or \code{RStudio} to end the command completely.
 }
