@@ -6,13 +6,15 @@
 #' If not provided or `NULL`, the function will process all dates within the `data` subfolder of
 #' your working directory.
 #'
+#' @param subdir The subdirectory where your scan files are located.
+#'
 #' @param time_zone The time zone to which you wish to force all date-times in the data
 #' (the data numbers will not be changed at all, just R's interpretation of the time zone using
 #' the `lubridate` package).
 #'
 #' @param verbose Boolean: Print updates to Console?
 #'
-#' @return This function will look for survey data within the `data` subfolder
+#' @return This function will look for survey data within the `subdir` subfolder
 #' of your working directory and return a list with various summary tables:
 #'
 #' \enumerate{
@@ -30,6 +32,7 @@
 #' @import dplyr
 #'
 survey_overviews <- function(survey_dates = NULL,
+                             subdir = 'data/',
                              time_zone = "Canada/Pacific",
                              verbose = TRUE){
 
@@ -47,7 +50,7 @@ survey_overviews <- function(survey_dates = NULL,
   } # end debugging
 
   if(is.null(survey_dates)){
-    (survey_dates <- gsub('.csv','',dir('./data')))
+    (survey_dates <- gsub('.csv','',dir(subdir)))
   }
 
   # Loop through each date
@@ -58,7 +61,7 @@ survey_overviews <- function(survey_dates = NULL,
     (survey_date <- survey_dates[i])
     if(verbose){message('--- ',survey_date)}
     suppressWarnings({
-      survi <- survey_overview(survey_date)
+      survi <- survey_overview(survey_date, subdir=subdir)
     })
     survi %>% names
 

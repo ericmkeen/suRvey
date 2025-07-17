@@ -3,11 +3,13 @@
 #' @param survey_date Survey date, in format `"yyyy-mm-dd"`. If `NULL` the current date
 #' will be used (according to your system's time).
 #'
+#' @param subdir The subdirectory where your scan files are located.
+#'
 #' @param time_zone The time zone to which you wish to force all date-times in the data
 #' (the data numbers will not be changed at all, just R's interpretation of the time zone using
 #' the `lubridate` package).
 #'
-#' @return This function will look for survey data within the `data` subfolder
+#' @return This function will look for survey data within the `subdir` subfolder
 #' of your working directory and return a list with various summary tables:
 #'
 #' \enumerate{
@@ -18,13 +20,14 @@
 #' \item `comments`: All comments.
 #' \item `data`: All data, with two fields added: `effort` (indicating whether each row occurs
 #' during systematic effort, with value `1`, or off-scan, value `0`) and `scan_id`
-#' (with a numeric indicator of which scan of the day the row of day correspnds to;
+#' (with a numeric indicator of which scan of the day the row of day corresponds to;
 #' if the row of data occurs outside of a scan, the value with be `NA`).
 #' }
 #' @import dplyr
 #' @export
 #'
 survey_overview <- function(survey_date = NULL,
+                            subdir = 'data/',
                             time_zone = "Canada/Pacific"){
 
   if(FALSE){ # for debugging -- not run!
@@ -48,7 +51,7 @@ survey_overview <- function(survey_date = NULL,
     survey_date <- Sys.Date() %>% as.character
   }
 
-  (fn <- paste0('data/',survey_date,'.csv'))
+  (fn <- paste0(subdir,survey_date,'.csv'))
   if(! file.exists(fn)){return(NULL)}
   df <- read.csv(fn, stringsAsFactors = FALSE, header=FALSE)
   df
