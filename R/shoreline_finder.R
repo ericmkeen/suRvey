@@ -74,43 +74,48 @@ shoreline_finder <- function(shoreline,
       st_crs(shoreline) <- st_crs(horline)
       st_crs(shoreline)
       intersections <-
-      sf::st_intersection(horline,
-                          st_cast(shoreline, "MULTILINESTRING", group_or_split = FALSE))
+        sf::st_intersection(horline,
+                            st_cast(shoreline, "MULTILINESTRING", group_or_split = FALSE))
     })
 
 
-    # Plot it
-    if(toplot){
-      plot(horline, add = TRUE)
-      plot(intersections, add = TRUE, col = "red", pch = 21)
+    length(intersections)
+    closest_intersection <- Inf
+    if(length(intersections) > 0){
+
+      # Plot it
+      if(toplot){
+        plot(horline, add = TRUE)
+        plot(intersections, add = TRUE, col = "red", pch = 21)
+      }
+
+      # Get coordinates of intersections
+      (intersections <- sf::st_coordinates(intersections) %>% as.data.frame)
+
+      # Get great-circle-distance to each of these points from fin island
+      intersections$km <-
+        apply(data.frame(intersections$Y, intersections$X), 1,
+              function(yx){
+                swfscMisc::distance(lat1 = platy,
+                                    lon1 = platx,
+                                    lat2 = yx[1],
+                                    lon2 = yx[2],
+                                    units = 'nm') * 1.852
+              })
+      # intersections$km <-
+      #   swfscMisc::distance(lat1 = platform_y,
+      #                       lon1 = platform_x,
+      #                       lat2 = intersections$Y,
+      #                       lon2 = intersections$X,
+      #                       units = 'nm') * 1.852
+
+      # Filter to intersections that are beyond min acceptable distance
+      intersections <- intersections %>% dplyr::filter(km > min_km)
+      if(verbose & length(bearing) <= 3){message(nrow(intersections),' intersections with shoreline found along sightline...')}
+
+      # Get closest of these intersections
+      (closest_intersection <- min(intersections$km))
     }
-
-    # Get coordinates of intersections
-    (intersections <- sf::st_coordinates(intersections) %>% as.data.frame)
-
-    # Get great-circle-distance to each of these points from fin island
-    intersections$km <-
-      apply(data.frame(intersections$Y, intersections$X), 1,
-            function(yx){
-              swfscMisc::distance(lat1 = platy,
-                                  lon1 = platx,
-                                  lat2 = yx[1],
-                                  lon2 = yx[2],
-                                  units = 'nm') * 1.852
-            })
-    # intersections$km <-
-    #   swfscMisc::distance(lat1 = platform_y,
-    #                       lon1 = platform_x,
-    #                       lat2 = intersections$Y,
-    #                       lon2 = intersections$X,
-    #                       units = 'nm') * 1.852
-
-    # Filter to intersections that are beyond min acceptable distance
-    intersections <- intersections %>% dplyr::filter(km > min_km)
-    if(verbose & length(bearing) <= 3){message(nrow(intersections),' intersections with shoreline found along sightline...')}
-
-    # Get closest of these intersections
-    (closest_intersection <- min(intersections$km))
 
     # Add to group
     closests <- c(closests, closest_intersection)

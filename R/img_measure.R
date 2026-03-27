@@ -75,16 +75,14 @@ image_measure <- function(img_path='images/',
                           filter_to_unmeasured = FALSE){
 
   if(FALSE){ #==================================================================
-
-    #library(BiocManager)
-    #if(! 'EBImage' %in% installed.packages()){
-    #  BiocManager::install("EBImage")
-    #}
+    transit <- '2507070708'
+    log_path = paste0('measures_',transit,'.csv')
+    filter_to_unmeasured = FALSE
     #library(shiny)
     #library(dplyr)
     #library(shinydashboard)
     img_path <- 'images/'
-    log_path <- 'measures.csv'
+    #log_path <- 'measures.csv'
     scroll_height = 400
     scroll_width = 1700
     start_index = 1
@@ -101,15 +99,13 @@ image_measure <- function(img_path='images/',
 
   } #===========================================================================
 
-  #if(! 'EBImage' %in% installed.packages()){
-  #  BiocManager::install("EBImage")
-  #}
-
   if(! file.exists(log_path)){
     previous_measures <- data.frame()
+    imi_measures <- data.frame()
   }else{
     suppressWarnings({suppressMessages({
       previous_measures <- readr::read_csv(log_path, col_names=FALSE)
+      imi_measures <- previous_measures %>% filter(X1 == unique(X1)[1])
     })})
   }
 
@@ -127,6 +123,8 @@ image_measure <- function(img_path='images/',
     message(length(image_files),' unmeasured files!')
     if(length(image_files) == 0){ stop('After filtering, no images need to be measured!')}
   }
+
+  image_files
 
   ######################################################################
   ######################################################################
@@ -149,9 +147,9 @@ image_measure <- function(img_path='images/',
                                   Drag & click to zoom; click again to unzoom. Double-click to erase the current measurement.</p>')))),
     hr(),
     fluidRow(column(1,h4('Image metadata:')),
-             column(2, textInput('lon', label='Lon:', value='-129.', width='100%')),
-             column(2, textInput('lat', label='Lat:', value='53.', width='100%')),
-             column(1, textInput('elev', label='Elev:', value='120', width='100%')),
+             column(2, textInput('lon', label='Lon:', value='', width='100%')),
+             column(2, textInput('lat', label='Lat:', value='', width='100%')),
+             column(1, textInput('elev', label='Elev:', value='', width='100%')),
              column(2, textInput('focal', label='Foc. Len. (mm):', value='24', width='100%')),
              column(3, textInput('comm', label='Comment:', value='', width='100%'))),
     fluidRow(column(12,
@@ -163,7 +161,6 @@ image_measure <- function(img_path='images/',
                                    'px; overflow-y: scroll;'),
                       uiOutput('img_show'),
                       width=12))),
-    fluidRow(column(12, verbatimTextOutput('pixels'))),
     hr(),
     fluidRow(column(12,
                     h5('Measures already on file for this image:'),
@@ -184,17 +181,18 @@ image_measure <- function(img_path='images/',
     rv$previous_measures <- previous_measures
     rv$reload <- 0
     rv$images <- image_files
-    rv$img <- NULL
     rv$imi <- start_index
-    rv$imi_measures <- data.frame()
+    rv$imi_measures <- imi_measures
     rv$brng <- NULL # y pixel to whale
     rv$whale <- NULL # x pixel to water line
     rv$shore <- NULL # x pixel to shore/horizon
+    ranges <- reactiveValues(x = NULL, y = NULL)
 
     # -------------------------------------------------------------------
     # Update measures
 
     observeEvent(rv$reload,{
+      print('reload triggered')
       if(file.exists(log_path)){
         suppressWarnings({
           suppressMessages({
@@ -202,8 +200,8 @@ image_measure <- function(img_path='images/',
             print(rv$previous_measures)
             isolate({
               if(nrow(rv$previous_measures)>0){
-                rv$imi_measures <- rv$previous_measures %>% filter(X1 == rv$images[rv$imi])
-                print(rv$imi_measures)
+               rv$imi_measures <- rv$previous_measures %>% filter(X1 == rv$images[rv$imi])
+               print(rv$imi_measures)
               }
             })
           })
@@ -211,16 +209,20 @@ image_measure <- function(img_path='images/',
       }else{
         rv$previous_measures <- data.frame()
       }
+      print('reload complete')
     })
 
     # -------------------------------------------------------------------
     # Display the image
 
     output$img_show <- renderUI({
+      print('img_show triggered')
       zoom <- input$zoom %>% as.numeric
       zoom <- as.numeric(zoom / 100)
       f <- rv$images[rv$imi] %>% as.character
+      print(f)
       img1 <- magick::image_read(f)
+      print(image_info(img1))
       plotOutput("plot1",
                  width=(image_info(img1)$width * zoom),
                  height=(image_info(img1)$height * zoom),
@@ -231,22 +233,24 @@ image_measure <- function(img_path='images/',
                    id = "plot1_brush",
                    resetOnNew = TRUE
                  ))
+      #print('img_show complete')
     })
 
     # -------------------------------------------------------------------
-    ranges <- reactiveValues(x = NULL, y = NULL)
 
     output$plot1 <- renderPlot({
+      print('plot1 triggered')
       f <- rv$images[rv$imi] %>% as.character
+      print(f)
       img1 <- magick::image_read(f)
 
       p <- image_ggplot(img1)
 
       if(nrow(rv$imi_measures)>0){
-        p <- p +
-          geom_point(data=rv$imi_measures, mapping=aes(x=X6, y=X4), color='yellow', size=3, pch='+') +
-          geom_point(data=rv$imi_measures, mapping=aes(x=X6, y=X5), color='yellow', size=3, pch='+') +
-          geom_segment(data=rv$imi_measures, mapping = aes(x=X6, xend=X6, y=X4, yend=X5), color='yellow', lwd=.25)
+       p <- p +
+         geom_point(data=rv$imi_measures, mapping=aes(x=X6, y=X4), color='yellow', size=3, pch='+') +
+         geom_point(data=rv$imi_measures, mapping=aes(x=X6, y=X5), color='yellow', size=3, pch='+') +
+         geom_segment(data=rv$imi_measures, mapping = aes(x=X6, xend=X6, y=X4, yend=X5), color='yellow', lwd=.25)
       }
 
       if(!is.null(rv$brng)){
@@ -269,6 +273,8 @@ image_measure <- function(img_path='images/',
         p +
           coord_cartesian(xlim = ranges$x, ylim = ranges$y, expand = FALSE)
       }
+
+      #print('plot1 complete')
     })
 
     # When a click happens, check if there's a brush on the plot.
@@ -324,11 +330,12 @@ image_measure <- function(img_path='images/',
     # Show info
 
     output$imgname <- renderText({
+      #rv$imi
       paste0('Image ',rv$imi,' out of ',length(rv$images),
              ' (filtered from ',length(image_files),
              ' image files) :: ','<br><br>',
              '<B><p style="font-size:12px">',rv$images[rv$imi],'</p></B>')
-
+      #'Render Text'
     })
 
     # -------------------------------------------------------------------
@@ -433,21 +440,24 @@ image_measure <- function(img_path='images/',
     })
 
     observeEvent(rv$imi, {
+    print('rv$imi triggered')
+    isolate({
+      if(rv$imi > length(rv$images)){
+        rv$imi <- 1
+      }
       isolate({
-        if(rv$imi > length(rv$images)){
-          rv$imi <- 1
+        if(nrow(previous_measures)>0){
+          rv$imi_measures <- rv$previous_measures %>% filter(X1 == rv$images[rv$imi])
         }
-        isolate({
-          if(nrow(previous_measures)>0){
-            rv$imi_measures <- rv$previous_measures %>% filter(X1 == rv$images[rv$imi])
-          }
-        })
       })
     })
+    print('rv$imi complete')
+    })
 
-    output$table1 <- renderDataTable({
+    output$table1 <- DT::renderDT({
       DT::datatable(rv$imi_measures)
     })
+
   }
 
   ######################################################################
@@ -457,3 +467,4 @@ image_measure <- function(img_path='images/',
   shinyApp(ui, server)
 
 }
+
