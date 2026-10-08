@@ -6,6 +6,7 @@
 \usage{
 survey_overviews(
   survey_dates = NULL,
+  subdir = "data/",
   time_zone = "Canada/Pacific",
   verbose = TRUE
 )
@@ -15,6 +16,8 @@ survey_overviews(
 If not provided or \code{NULL}, the function will process all dates within the \code{data} subfolder of
 your working directory.}
 
+\item{subdir}{The subdirectory where your scan files are located.}
+
 \item{time_zone}{The time zone to which you wish to force all date-times in the data
 (the data numbers will not be changed at all, just R's interpretation of the time zone using
 the \code{lubridate} package).}
@@ -22,7 +25,7 @@ the \code{lubridate} package).}
 \item{verbose}{Boolean: Print updates to Console?}
 }
 \value{
-This function will look for survey data within the \code{data} subfolder
+This function will look for survey data within the \code{subdir} subfolder
 of your working directory and return a list with various summary tables:
 
 \enumerate{

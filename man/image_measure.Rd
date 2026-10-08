@@ -8,6 +8,7 @@ image_measure(
   img_path = "images/",
   log_path = "measures.csv",
   start_index = 1,
+  auto_advance = FALSE,
   features = c("Other", "Whale (certain)", "Whale (maybe)", "LNG carrier (bow)",
     "LNG carrier (stern)", "Tug (bow)", "Tug (stern)", "Vessel (bow)", "Vessel (stern)"),
   zoom_options = c(30, 50, 60, 70, 80, 90, 100, 125, 150, 175, 200, 300),
@@ -25,6 +26,8 @@ The default assumption is a file, \code{measures.csv}, within your working direc
 If this file does not exist in the specified path, the function will create it.}
 
 \item{start_index}{Index of file to start on.}
+
+\item{auto_advance}{If \code{TRUE}, the app will advance to the next image after a measure is saved. Useful for single-measure-per-image protocols.}
 
 \item{features}{Character vector of features to choose from. You can measure multiple features on the same image.}
 

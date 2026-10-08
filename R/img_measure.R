@@ -12,6 +12,8 @@
 #'
 #' @param start_index Index of file to start on.
 #'
+#' @param auto_advance If `TRUE`, the app will advance to the next image after a measure is saved. Useful for single-measure-per-image protocols.
+#'
 #' @param features Character vector of features to choose from. You can measure multiple features on the same image.
 #'
 #' @param zoom_options Numeric vector of zoom options to choose from; the default will be the first one in your vector.
@@ -64,6 +66,7 @@
 image_measure <- function(img_path='images/',
                           log_path='measures.csv',
                           start_index = 1,
+                          auto_advance = FALSE,
                           features = c('Other',
                                        'Whale (certain)', 'Whale (maybe)',
                                        'LNG carrier (bow)', 'LNG carrier (stern)',
@@ -138,7 +141,8 @@ image_measure <- function(img_path='images/',
                             choices = features,
                             selected = features[1], width='100%')),
       column(2,uiOutput('save')),
-      column(2,actionButton(inputId="skip",label=h4(HTML("Next<br/>image")),width="95%")),
+      column(1,actionButton(inputId="back",label=h4(HTML("Back")),width="95%")),
+      column(1,actionButton(inputId="skip",label=h4(HTML("Next")),width="95%")),
       column(4,htmlOutput("imgname")),
       column(2,selectInput('zoom', label='Set widest zoom %',
                            choices=as.character(zoom_options),
@@ -381,7 +385,7 @@ image_measure <- function(img_path='images/',
         #print(newline)
         cat(newline, file=log_path, append = TRUE)
         rv$reload <- rv$reload + 1
-        #if(!input$filter){rv$imi <- rv$imi + 1}
+        if(auto_advance){rv$imi <- rv$imi + 1}
         rv$brng <- NULL
         rv$whale <- NULL
         rv$shore <- NULL
@@ -416,7 +420,7 @@ image_measure <- function(img_path='images/',
         #print(newline)
         cat(newline, file=log_path, append = TRUE)
         rv$reload <- rv$reload + 1
-        if(!input$filter){rv$imi <- rv$imi + 1}
+        if(!input$filter | auto_advance){rv$imi <- rv$imi + 1}
         rv$brng <- NULL
         rv$whale <- NULL
         rv$shore <- NULL
@@ -439,10 +443,28 @@ image_measure <- function(img_path='images/',
       shinyjs::reset('zoom')
     })
 
+    observeEvent(input$back, {
+      isolate({ rv$imi <- rv$imi - 1 })
+      rv$brng <- NULL
+      rv$whale <- NULL
+      rv$shore <- NULL
+      rv$imi_measures <- data.frame()
+      shinyjs::reset('feature')
+      shinyjs::reset('lat')
+      shinyjs::reset('lon')
+      shinyjs::reset('elev')
+      shinyjs::reset('focal')
+      shinyjs::reset('comm')
+      shinyjs::reset('zoom')
+    })
+
     observeEvent(rv$imi, {
     print('rv$imi triggered')
     isolate({
       if(rv$imi > length(rv$images)){
+        rv$imi <- 1
+      }
+      if(rv$imi < 1){
         rv$imi <- 1
       }
       isolate({

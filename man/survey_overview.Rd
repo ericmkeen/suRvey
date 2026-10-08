@@ -4,18 +4,24 @@
 \alias{survey_overview}
 \title{Summarize survey data for a single date}
 \usage{
-survey_overview(survey_date = NULL, time_zone = "Canada/Pacific")
+survey_overview(
+  survey_date = NULL,
+  subdir = "data/",
+  time_zone = "Canada/Pacific"
+)
 }
 \arguments{
 \item{survey_date}{Survey date, in format \code{"yyyy-mm-dd"}. If \code{NULL} the current date
 will be used (according to your system's time).}
+
+\item{subdir}{The subdirectory where your scan files are located.}
 
 \item{time_zone}{The time zone to which you wish to force all date-times in the data
 (the data numbers will not be changed at all, just R's interpretation of the time zone using
 the \code{lubridate} package).}
 }
 \value{
-This function will look for survey data within the \code{data} subfolder
+This function will look for survey data within the \code{subdir} subfolder
 of your working directory and return a list with various summary tables:
 
 \enumerate{
@@ -26,7 +32,7 @@ of your working directory and return a list with various summary tables:
 \item \code{comments}: All comments.
 \item \code{data}: All data, with two fields added: \code{effort} (indicating whether each row occurs
 during systematic effort, with value \code{1}, or off-scan, value \code{0}) and \code{scan_id}
-(with a numeric indicator of which scan of the day the row of day correspnds to;
+(with a numeric indicator of which scan of the day the row of day corresponds to;
 if the row of data occurs outside of a scan, the value with be \code{NA}).
 }
 }
